@@ -34,10 +34,22 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  background-color: #070d1a;
+}
+
 body {
   background-color: #070d1a;
   color: rgb(var(--foreground));
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ─── Extra Small Breakpoint ────────────────────────────────────── */
+@media (min-width: 480px) {
+  .xs\:block { display: block; }
+  .xs\:hidden { display: none; }
+  .xs\:flex { display: flex; }
+  .xs\:inline { display: inline; }
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────── */
@@ -68,9 +80,15 @@ body {
 /* ─── Background Grid ───────────────────────────────────────────── */
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+@media (min-width: 768px) {
+  .grid-bg {
+    background-size: 50px 50px;
+  }
 }
 
 /* ─── Glassmorphism ─────────────────────────────────────────────── */
@@ -78,7 +96,6 @@ body {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-strong {
@@ -90,7 +107,7 @@ body {
 
 /* ─── Glow Effects ──────────────────────────────────────────────── */
 .glow-blue {
-  box-shadow: 0 0 30px rgba(13, 183, 237, 0.15), 0 0 60px rgba(13, 183, 237, 0.05);
+  box-shadow: 0 0 20px rgba(13, 183, 237, 0.15), 0 0 40px rgba(13, 183, 237, 0.05);
 }
 
 .glow-text {
@@ -145,4 +162,22 @@ pre[class*="language-"] {
   syntax: '<angle>';
   initial-value: 0deg;
   inherits: false;
+}
+
+/* ─── Form element responsive tweaks ───────────────────────────── */
+input, select, textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Prevent zoom on mobile input focus (iOS) */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Touch-friendly tap targets ───────────────────────────────── */
+button {
+  -webkit-tap-highlight-color: transparent;
 }
