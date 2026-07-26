@@ -48,7 +48,7 @@ function Input({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className={cn(
-        "w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600",
+        "w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600",
         "focus:outline-none focus:border-docker-blue/50 focus:ring-1 focus:ring-docker-blue/20 transition-all duration-200"
       )}
     />
@@ -79,13 +79,13 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
   const allServiceNames = config.services.map((s) => s.name).filter(Boolean);
 
   return (
-    <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 220px)" }}>
+    <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 280px)" }}>
       {/* Project Config */}
-      <div className="space-y-3 p-4 rounded-xl bg-white/[0.02] border border-white/10">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Project Settings</h3>
-        <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-3 p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/[0.08]">
+        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Project Settings</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Project Name</label>
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">Project Name</label>
             <Input
               id="project-name"
               value={config.projectName}
@@ -94,11 +94,11 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Compose Version</label>
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">Compose Version</label>
             <select
               value={config.version}
               onChange={(e) => update("version", e.target.value)}
-              className="w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-sm text-slate-200 [&>option]:bg-slate-900 focus:outline-none focus:border-docker-blue/50"
+              className="w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200 [&>option]:bg-slate-900 focus:outline-none focus:border-docker-blue/50"
             >
               <option value="3.9">3.9 (latest)</option>
               <option value="3.8">3.8</option>
@@ -108,18 +108,19 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
         </div>
       </div>
 
-      {/* Services */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers size={14} className="text-docker-blue" />
-            <span className="text-sm font-medium text-slate-300">Services</span>
-            <span className="px-2 py-0.5 rounded-full bg-docker-blue/10 text-docker-blue text-xs font-bold">
-              {config.services.length}
-            </span>
-          </div>
+      {/* Services Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Layers size={14} className="text-docker-blue" />
+          <span className="text-sm font-medium text-slate-300">Services</span>
+          <span className="px-2 py-0.5 rounded-full bg-docker-blue/10 border border-docker-blue/20 text-docker-blue text-xs font-bold">
+            {config.services.length}
+          </span>
         </div>
+      </div>
 
+      {/* Services List */}
+      <div className="space-y-3">
         <AnimatePresence mode="popLayout">
           {config.services.map((service, index) => (
             <motion.div
@@ -143,7 +144,7 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
           onClick={addService}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-docker-blue/30 text-docker-blue hover:bg-docker-blue/5 hover:border-docker-blue/50 transition-all duration-200 text-sm font-medium"
         >
-          <Plus size={16} />
+          <Plus size={15} />
           Add Service
         </button>
       </div>

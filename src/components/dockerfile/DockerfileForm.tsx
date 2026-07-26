@@ -42,7 +42,7 @@ function Input({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className={cn(
-        "w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600",
+        "w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600",
         "focus:outline-none focus:border-docker-blue/50 focus:ring-1 focus:ring-docker-blue/20 transition-all duration-200",
         className
       )}
@@ -63,12 +63,15 @@ function Toggle({
 }) {
   return (
     <div
-      className="flex items-center justify-between gap-4 p-3 rounded-lg bg-white/[0.03] border border-white/10 cursor-pointer"
+      className="flex items-center justify-between gap-4 p-3 sm:p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.08] cursor-pointer hover:bg-white/[0.05] transition-all duration-200 active:scale-[0.99]"
       onClick={() => onChange(!checked)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onChange(!checked)}
     >
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-medium text-slate-200">{label}</p>
-        {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+        {description && <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{description}</p>}
       </div>
       <div
         className={cn(
@@ -79,7 +82,7 @@ function Toggle({
         <div
           className={cn(
             "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200",
-            checked ? "left-5" : "left-0.5"
+            checked ? "translate-x-5" : "translate-x-0.5"
           )}
         />
       </div>
@@ -104,9 +107,9 @@ function Select({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={cn(
-        "w-full rounded-lg bg-white/[0.04] border border-white/10 px-3 py-2 text-sm text-slate-200",
+        "w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200",
         "focus:outline-none focus:border-docker-blue/50 focus:ring-1 focus:ring-docker-blue/20 transition-all duration-200",
-        "[&>option]:bg-slate-900"
+        "[&>option]:bg-slate-900 [&>option]:text-base"
       )}
     >
       {options.map((opt) => (
@@ -121,11 +124,11 @@ function Select({
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <div className="h-px flex-1 bg-white/10" />
-      <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+      <div className="h-px flex-1 bg-white/[0.08]" />
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
         {children}
       </span>
-      <div className="h-px flex-1 bg-white/10" />
+      <div className="h-px flex-1 bg-white/[0.08]" />
     </div>
   );
 }
@@ -166,7 +169,7 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
   };
 
   return (
-    <div className="space-y-5 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 220px)" }}>
+    <div className="space-y-5 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 280px)" }}>
       {/* Framework */}
       <div>
         <SectionTitle>Framework</SectionTitle>
@@ -196,7 +199,7 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
                 options={[
                   { value: "alpine", label: "Alpine (smallest)" },
                   { value: "slim", label: "Slim (balanced)" },
-                  { value: "debian", label: "Debian (compatible)" },
+                  { value: "debian", label: "Debian (compat.)" },
                 ]}
               />
             </div>
@@ -231,6 +234,7 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
               value={config.buildCommand}
               onChange={(v) => update("buildCommand", v)}
               placeholder="npm run build"
+              className="font-mono text-xs"
             />
           </div>
 
@@ -241,6 +245,7 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
               value={config.startCommand}
               onChange={(v) => update("startCommand", v)}
               placeholder="npm start"
+              className="font-mono text-xs"
             />
           </div>
         </div>
@@ -288,7 +293,7 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="hc-interval">Interval (seconds)</Label>
+              <Label htmlFor="hc-interval">Interval (sec)</Label>
               <Input
                 id="hc-interval"
                 type="number"
@@ -302,9 +307,7 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
 
       {/* Environment Variables */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <SectionTitle>Environment Variables</SectionTitle>
-        </div>
+        <SectionTitle>Environment Variables</SectionTitle>
         <div className="space-y-2">
           {config.envVars.map((envVar, index) => (
             <div key={index} className="flex gap-2">
@@ -312,27 +315,28 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
                 value={envVar.key}
                 onChange={(v) => updateEnvVar(index, "key", v)}
                 placeholder="KEY"
-                className="flex-1 font-mono"
+                className="flex-1 font-mono text-xs"
               />
               <Input
                 value={envVar.value}
                 onChange={(v) => updateEnvVar(index, "value", v)}
                 placeholder="value"
-                className="flex-1 font-mono"
+                className="flex-1 font-mono text-xs"
               />
               <button
                 onClick={() => removeEnvVar(index)}
-                className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 flex-shrink-0"
+                className="p-2.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 flex-shrink-0"
+                aria-label="Remove variable"
               >
-                <Trash2 size={14} />
+                <Trash2 size={13} />
               </button>
             </div>
           ))}
           <button
             onClick={addEnvVar}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-white/20 text-slate-500 hover:text-slate-300 hover:border-white/30 transition-all duration-200 text-sm"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-white/20 text-slate-500 hover:text-slate-300 hover:border-docker-blue/30 hover:bg-docker-blue/5 transition-all duration-200 text-xs font-medium"
           >
-            <Plus size={14} />
+            <Plus size={13} />
             Add Variable
           </button>
         </div>
