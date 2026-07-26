@@ -3,7 +3,8 @@ import { ServiceConfig, ServicePreset, PortMapping, VolumeMount } from "@/types/
 import { EnvVar } from "@/types/dockerfile";
 import { SERVICE_PRESETS } from "@/lib/generators/templates";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus, ChevronDown, ChevronUp, Server } from "lucide-react";
+import { Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
+
 import { useState } from "react";
 
 interface ServiceCardProps {

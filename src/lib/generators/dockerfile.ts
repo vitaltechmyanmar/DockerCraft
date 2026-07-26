@@ -1,9 +1,5 @@
 import { DockerfileConfig, FrameworkId } from "@/types/dockerfile";
 
-function indent(lines: string[], spaces = 4): string {
-  return lines.map((l) => " ".repeat(spaces) + l).join("\n");
-}
-
 function envVarsBlock(config: DockerfileConfig): string {
   if (config.envVars.length === 0) return "";
   const lines = config.envVars.map(({ key, value }) => `ENV ${key}="${value}"`);
@@ -13,11 +9,6 @@ function envVarsBlock(config: DockerfileConfig): string {
 function healthCheckBlock(config: DockerfileConfig): string {
   if (!config.healthCheck) return "";
   return `\nHEALTHCHECK --interval=${config.healthCheckInterval}s --timeout=5s --start-period=10s --retries=3 \\\n  CMD wget -qO- http://localhost:${config.port}${config.healthCheckPath} || exit 1`;
-}
-
-function nonRootBlock(runtime?: boolean): string {
-  if (runtime === false) return "";
-  return `\nRUN addgroup --system --gid 1001 appgroup && \\\n    adduser --system --uid 1001 --ingroup appgroup appuser\n\nUSER appuser`;
 }
 
 // ─── Framework-specific generators ─────────────────────────────────────────────

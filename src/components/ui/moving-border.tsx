@@ -1,5 +1,6 @@
 "use client";
-import React, { useRef } from "react";
+import React from "react";
+
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +23,6 @@ export function MovingBorder({
   as: Tag = "button",
   ...otherProps
 }: MovingBorderProps) {
-  const pathRef = useRef<SVGRectElement>(null);
-
   return (
     <Tag
       className={cn(
@@ -46,7 +45,6 @@ export function MovingBorder({
             height="100%"
             rx="13"
             ry="13"
-            ref={pathRef}
           />
         </svg>
         <div
