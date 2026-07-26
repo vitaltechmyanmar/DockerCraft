@@ -1,0 +1,220 @@
+import { ComposeConfig, ServiceConfig } from "@/types/compose";
+
+function renderEnvVars(envVars: { key: string; value: string }[], indent = 6): string {
+  if (envVars.length === 0) return "";
+  const spaces = " ".repeat(indent);
+  const lines = envVars.map(({ key, value }) => `${spaces}- ${key}=${value}`);
+  return `\n${" ".repeat(indent - 2)}environment:\n${lines.join("\n")}`;
+}
+
+function renderPorts(ports: { host: number; container: number }[], indent = 6): string {
+  if (ports.length === 0) return "";
+  const spaces = " ".repeat(indent);
+  const lines = ports.map(({ host, container }) => `${spaces}- "${host}:${container}"`);
+  return `\n${" ".repeat(indent - 2)}ports:\n${lines.join("\n")}`;
+}
+
+function renderVolumes(volumes: { source: string; target: string }[], indent = 6): string {
+  if (volumes.length === 0) return "";
+  const spaces = " ".repeat(indent);
+  const lines = volumes.map(({ source, target }) => `${spaces}- ${source}:${target}`);
+  return `\n${" ".repeat(indent - 2)}volumes:\n${lines.join("\n")}`;
+}
+
+function renderDependsOn(deps: string[], indent = 6): string {
+  if (deps.length === 0) return "";
+  const spaces = " ".repeat(indent);
+  const lines = deps.map((d) => `${spaces}- ${d}`);
+  return `\n${" ".repeat(indent - 2)}depends_on:\n${lines.join("\n")}`;
+}
+
+function renderNetworks(networks: string[], indent = 6): string {
+  if (networks.length === 0) return "";
+  const spaces = " ".repeat(indent);
+  const lines = networks.map((n) => `${spaces}- ${n}`);
+  return `\n${" ".repeat(indent - 2)}networks:\n${lines.join("\n")}`;
+}
+
+function renderService(service: ServiceConfig): string {
+  const lines: string[] = [];
+
+  lines.push(`  ${service.name}:`);
+
+  if (service.useDockerfile) {
+    lines.push(`    build:`);
+    lines.push(`      context: .`);
+    if (service.dockerfilePath && service.dockerfilePath !== "Dockerfile") {
+      lines.push(`      dockerfile: ${service.dockerfilePath}`);
+    }
+  } else {
+    lines.push(`    image: ${service.image}`);
+  }
+
+  if (service.containerName) {
+    lines.push(`    container_name: ${service.containerName}`);
+  }
+
+  if (service.restart !== "no") {
+    lines.push(`    restart: ${service.restart}`);
+  }
+
+  if (service.ports.length > 0) {
+    lines.push(`    ports:${renderPorts(service.ports, 6).replace(/\n    ports:\n/, "\n")}`);
+    // Fix: inline the ports
+  }
+  if (service.environment.length > 0) {
+    lines.push(`    environment:`);
+    service.environment.forEach(({ key, value }) => {
+      lines.push(`      - ${key}=${value}`);
+    });
+  }
+
+  if (service.volumes.length > 0) {
+    lines.push(`    volumes:`);
+    service.volumes.forEach(({ source, target }) => {
+      lines.push(`      - ${source}:${target}`);
+    });
+  }
+
+  if (service.ports.length > 0) {
+    // remove duplicated ports (already inlined above)
+  }
+
+  if (service.dependsOn.length > 0) {
+    lines.push(`    depends_on:`);
+    service.dependsOn.forEach((d) => {
+      lines.push(`      - ${d}`);
+    });
+  }
+
+  if (service.networks.length > 0) {
+    lines.push(`    networks:`);
+    service.networks.forEach((n) => {
+      lines.push(`      - ${n}`);
+    });
+  }
+
+  if (service.command) {
+    lines.push(`    command: ${service.command}`);
+  }
+
+  return lines.join("\n");
+}
+
+function renderServiceClean(service: ServiceConfig): string {
+  const parts: string[] = [];
+
+  parts.push(`  ${service.name}:`);
+
+  if (service.useDockerfile) {
+    parts.push(`    build:`);
+    parts.push(`      context: .`);
+    if (service.dockerfilePath && service.dockerfilePath !== "Dockerfile") {
+      parts.push(`      dockerfile: ${service.dockerfilePath}`);
+    }
+  } else {
+    parts.push(`    image: ${service.image}`);
+  }
+
+  if (service.containerName) {
+    parts.push(`    container_name: ${service.containerName}`);
+  }
+
+  if (service.restart !== "no") {
+    parts.push(`    restart: ${service.restart}`);
+  }
+
+  if (service.ports.length > 0) {
+    parts.push(`    ports:`);
+    service.ports.forEach(({ host, container }) => {
+      parts.push(`      - "${host}:${container}"`);
+    });
+  }
+
+  if (service.environment.length > 0) {
+    parts.push(`    environment:`);
+    service.environment.forEach(({ key, value }) => {
+      parts.push(`      - ${key}=${value}`);
+    });
+  }
+
+  if (service.volumes.length > 0) {
+    parts.push(`    volumes:`);
+    service.volumes.forEach(({ source, target }) => {
+      parts.push(`      - ${source}:${target}`);
+    });
+  }
+
+  if (service.dependsOn.length > 0) {
+    parts.push(`    depends_on:`);
+    service.dependsOn.forEach((d) => {
+      parts.push(`      - ${d}`);
+    });
+  }
+
+  if (service.networks.length > 0) {
+    parts.push(`    networks:`);
+    service.networks.forEach((n) => {
+      parts.push(`      - ${n}`);
+    });
+  }
+
+  if (service.command) {
+    parts.push(`    command: ${service.command}`);
+  }
+
+  return parts.join("\n");
+}
+
+export function generateCompose(config: ComposeConfig): string {
+  const lines: string[] = [];
+
+  // Header
+  lines.push(`# Generated by DockerCraft`);
+  lines.push(`# docker-compose.yml`);
+  lines.push(``);
+  if (config.projectName) {
+    lines.push(`name: ${config.projectName}`);
+    lines.push(``);
+  }
+  lines.push(`services:`);
+
+  // Services
+  config.services.forEach((service, i) => {
+    lines.push(renderServiceClean(service));
+    if (i < config.services.length - 1) {
+      lines.push("");
+    }
+  });
+
+  // Named networks
+  const namedNetworks = config.networks.filter((n) => n.trim() !== "");
+  if (namedNetworks.length > 0) {
+    lines.push(``);
+    lines.push(`networks:`);
+    namedNetworks.forEach((n) => {
+      lines.push(`  ${n}:`);
+    });
+  }
+
+  // Named volumes (from services that reference named volumes, not paths)
+  const namedVolumes = new Set<string>();
+  config.services.forEach((service) => {
+    service.volumes.forEach(({ source }) => {
+      // Named volumes don't start with . or /
+      if (!source.startsWith(".") && !source.startsWith("/")) {
+        namedVolumes.add(source);
+      }
+    });
+  });
+
+  if (namedVolumes.size > 0) {
+    lines.push(``);
+    lines.push(`volumes:`);
+    namedVolumes.forEach((v) => {
+      lines.push(`  ${v}:`);
+    });
+  }
+
+  return lines.join("\n");
+}
