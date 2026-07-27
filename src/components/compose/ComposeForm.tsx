@@ -97,32 +97,17 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
             <Input id="project-name" value={config.projectName} onChange={(v) => update("projectName", v)} placeholder="my-project" />
           </div>
           <div>
-<<<<<<< HEAD
-            <label
-              className="block text-xs font-medium mb-1 transition-colors"
-              style={{ color: config.useV2Spec ? "var(--text-subtle)" : "var(--text-muted)", textDecoration: config.useV2Spec ? "line-through" : "none" }}
-            >
-              Compose Version
-            </label>
-=======
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Compose Version</label>
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Compose Version</label>
             <select
               value={config.version}
               onChange={(e) => update("version", e.target.value)}
-<<<<<<< HEAD
               className="w-full rounded px-3 py-2 text-sm transition-all"
               style={{
                 background: "var(--bg-elevated)",
                 border: "1px solid var(--border)",
-                color: config.useV2Spec ? "var(--text-subtle)" : "var(--text-primary)",
+                color: "var(--text-primary)",
                 outline: "none",
-                opacity: config.useV2Spec ? 0.5 : 1,
-                cursor: config.useV2Spec ? "not-allowed" : "default",
               }}
-=======
-              className="w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200 [&>option]:bg-slate-900 focus:outline-none focus:border-docker-blue/50"
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
             >
               <option value="3.9" style={{ background: "var(--bg-panel)" }}>3.9 (latest)</option>
               <option value="3.8" style={{ background: "var(--bg-panel)" }}>3.8</option>
@@ -130,38 +115,6 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
             </select>
           </div>
         </div>
-<<<<<<< HEAD
-
-        {/* Compose v2 toggle */}
-        <div
-          className="flex items-center justify-between gap-4 px-3 py-2.5 rounded cursor-pointer transition-colors duration-150"
-          style={{
-            border: "1px solid var(--border)",
-            background: config.useV2Spec ? "rgba(13,183,237,0.04)" : "var(--bg-elevated)",
-          }}
-          onClick={() => update("useV2Spec", !config.useV2Spec)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && update("useV2Spec", !config.useV2Spec)}
-        >
-          <div className="min-w-0">
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Use Compose v2 Spec</p>
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-subtle)" }}>
-              Omits the <code className="font-mono" style={{ color: "var(--accent)" }}>version:</code> field (modern standard)
-            </p>
-          </div>
-          <div
-            className="relative w-9 h-5 rounded-full transition-colors duration-200 flex-shrink-0"
-            style={{ background: config.useV2Spec ? "var(--accent)" : "var(--border)" }}
-          >
-            <div
-              className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200"
-              style={{ transform: config.useV2Spec ? "translateX(18px)" : "translateX(2px)" }}
-            />
-          </div>
-        </div>
-=======
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
       </div>
 
       {/* Services */}

@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-﻿import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
+import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-=======
-import { DockerfileConfig, FrameworkId } from "@/types/dockerfile";
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
 
 function envVarsBlock(config: DockerfileConfig): string {
   if (config.envVars.length === 0) return "";
@@ -17,7 +13,6 @@ function healthCheckBlock(config: DockerfileConfig): string {
   return `\nHEALTHCHECK --interval=${config.healthCheckInterval}s --timeout=5s --start-period=10s --retries=3 \\\n  CMD wget -qO- http://localhost:${config.port}${config.healthCheckPath} || exit 1`;
 }
 
-<<<<<<< HEAD
 // ─── Package Manager Helper ──────────────────────────────────────────────────
 
 interface PkgCmds {
@@ -70,9 +65,6 @@ function pkgMgrCommands(pm: JsPackageManager = "npm"): PkgCmds {
 }
 
 // ─── Framework-specific generators ──────────────────────────────────────────
-=======
-// ─── Framework-specific generators ─────────────────────────────────────────────
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
 
 function generateNodejs(config: DockerfileConfig): string {
   const baseTag = config.baseImage === "alpine"
@@ -198,23 +190,6 @@ COPY . .
 EXPOSE ${config.port}
 CMD ["bun", "run", "start"]${healthCheckBlock(config)}`;
 }
-
-<<<<<<< HEAD
-function generateDeno(config: DockerfileConfig): string {
-  return `FROM denoland/deno:${config.version}
-WORKDIR ${config.workdir}
-${envVarsBlock(config)}
-${config.nonRootUser ? `RUN groupadd --system --gid 1001 denogroup && \\\n    useradd --system --uid 1001 --gid denogroup denouser\n` : ""}
-# Cache dependencies (runs deno cache on entry point)
-COPY . .
-RUN ${config.buildCommand}
-${config.nonRootUser ? "\nUSER denouser\n" : ""}
-EXPOSE ${config.port}
-CMD [${config.startCommand.split(" ").map((s) => `"${s}"`).join(", ")}]${healthCheckBlock(config)}`;
-}
-
-=======
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
 function generatePython(config: DockerfileConfig): string {
   const baseTag = config.baseImage === "alpine"
     ? `${config.version}-alpine`
