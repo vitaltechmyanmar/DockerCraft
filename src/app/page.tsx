@@ -587,7 +587,7 @@ function PanelHeader({
         {icon}
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem", lineHeight: 1.2 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, color: TEXT_PRIMARY, fontSize: "0.8rem", lineHeight: 1.2 }}>
           {title}
         </Typography>
         <Typography variant="caption" sx={{ color: TEXT_SECONDARY, fontSize: "0.68rem" }}>
