@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/DockerCraft-v1.2.0-0db7ed?style=for-the-badge&logo=docker&logoColor=white" alt="DockerCraft" />
+<img src="https://img.shields.io/badge/DockerCraft-v1.3.0-0db7ed?style=for-the-badge&logo=docker&logoColor=white" alt="DockerCraft" />
 
 # 🐳 DockerCraft
 
@@ -8,6 +8,7 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![MUI](https://img.shields.io/badge/MUI-v5-007FFF?style=flat-square&logo=mui)](https://mui.com/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](./LICENSE)
 
@@ -21,6 +22,7 @@
 
 - [Overview](#-overview)
 - [Features](#-features)
+- [Docker Docs Panel](#-docker-docs-panel)
 - [Supported Frameworks](#-supported-frameworks)
 - [Tech Stack](#-tech-stack)
 - [Getting Started](#-getting-started)
@@ -28,6 +30,7 @@
 - [Architecture](#-architecture)
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
+- [Changelog](#-changelog)
 - [License](#-license)
 
 ---
@@ -55,7 +58,25 @@
 | 📦 **Package Manager Choice** | Select npm, pnpm, yarn, or bun for Node.js-based frameworks |
 | 🔀 **Compose v2 Spec Toggle** | Omit the `version:` field for the modern Compose Spec standard |
 | 📱 **Fully Responsive** | Works seamlessly on desktop and mobile |
-| 🖥️ **Minimal IDE UI** | Clean flat dark design — no animations, no blur, instant render |
+| 🖥️ **MUI-Themed UI** | Material UI AppBar, Tabs, Drawer, Chips — premium dark IDE aesthetic |
+| 📚 **Docker Docs Panel** | Built-in side drawer with Dockerfile directives, Compose keys, quick commands & best practices |
+
+---
+
+## 📚 Docker Docs Panel
+
+DockerCraft includes a built-in **Docker Reference Docs** side drawer accessible via the **"Docs" button** in the navigation bar.
+
+The drawer slides in from the right and contains five sections:
+
+| Section | Contents |
+|---|---|
+| **Official Docs** | Quick-link chips to docs.docker.com pages |
+| **Dockerfile Directives** | 12 directives (FROM, RUN, COPY, WORKDIR, EXPOSE, ENV, CMD, ENTRYPOINT, ARG, HEALTHCHECK, USER, VOLUME) with syntax, description, example, and link |
+| **Compose Keys** | 10 Compose spec keys (services, image, build, ports, environment, volumes, depends_on, networks, restart, healthcheck) |
+| **Quick Commands** | 10 essential Docker CLI commands with descriptions |
+| **Best Practices** | 8 Docker build best practices |
+| **Multi-Stage Example** | Full annotated Node.js multi-stage Dockerfile example |
 
 ---
 
@@ -114,8 +135,9 @@
 |---|---|
 | **Framework** | [Next.js 14](https://nextjs.org/) (App Router) |
 | **Language** | [TypeScript 5](https://www.typescriptlang.org/) |
+| **UI Library** | [Material UI v5](https://mui.com/) (AppBar, Tabs, Drawer, Chip, Tooltip, Paper) |
 | **Styling** | [Tailwind CSS 3](https://tailwindcss.com/) + CSS custom properties |
-| **Icons** | [Lucide React](https://lucide.dev/) |
+| **Icons** | [MUI Icons](https://mui.com/material-ui/material-icons/) + [Lucide React](https://lucide.dev/) |
 | **Syntax Highlight** | [React Syntax Highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter) |
 | **Font** | [Inter](https://fonts.google.com/specimen/Inter) (Google Fonts) |
 | **Linting** | ESLint + TypeScript ESLint |
@@ -162,9 +184,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 docker-generator/
 ├── src/
 │   ├── app/
-│   │   ├── globals.css          # Global styles + Tailwind base layers
-│   │   ├── layout.tsx           # Root layout + metadata + fonts
-│   │   └── page.tsx             # Main page (tab switcher, layout, hero)
+│   │   ├── globals.css          # Global styles + Tailwind base layers + CSS vars
+│   │   ├── layout.tsx           # Root layout + metadata + MuiThemeProvider
+│   │   └── page.tsx             # Main page (MUI AppBar, Tabs, DockerDocsDrawer)
 │   │
 │   ├── components/
 │   │   ├── compose/
@@ -178,8 +200,10 @@ docker-generator/
 │   │   │   └── FrameworkSelector.tsx    # Framework picker grid
 │   │   │
 │   │   ├── shared/
-│   │   │   ├── CopyButton.tsx   # Copy to clipboard button
-│   │   │   └── DownloadButton.tsx # File download button
+│   │   │   ├── CopyButton.tsx           # Copy to clipboard button
+│   │   │   ├── DownloadButton.tsx       # File download button
+│   │   │   ├── DockerDocsDrawer.tsx     # [NEW] Docker reference docs side drawer
+│   │   │   └── MuiThemeProvider.tsx     # [NEW] Client-side MUI ThemeProvider wrapper
 │   │   │
 │   │   └── ui/
 │   │       └── spotlight.tsx    # (legacy — no longer used in UI)
@@ -189,6 +213,7 @@ docker-generator/
 │   │   │   ├── dockerfile.ts    # Dockerfile generation logic (per framework)
 │   │   │   ├── compose.ts       # Docker Compose YAML generation
 │   │   │   └── templates.ts     # Framework templates & service presets
+│   │   ├── theme.ts             # [NEW] MUI dark theme (Docker blue palette)
 │   │   └── utils.ts             # cn() utility, generateId()
 │   │
 │   └── types/
@@ -235,12 +260,13 @@ User Input (Form)
 ### Key Design Decisions
 
 1. **Pure Client-Side Generation** — All Dockerfile and Compose generation happens in the browser. No server calls, no latency, instant preview.
-2. **Framework-Specific Generators** — Each framework has its own dedicated generator function in `lib/generators/dockerfile.ts`, making it easy to add or modify framework support.
-3. **Template-Driven Defaults** — `lib/generators/templates.ts` stores all framework metadata (default versions, ports, commands) separately from generation logic.
-4. **CSS Custom Properties Design System** — All colors are defined as CSS variables (`--bg-base`, `--bg-panel`, `--border`, `--accent`, etc.) in `globals.css`. No Tailwind color utilities for UI chrome — every component uses `style={{ color: "var(--accent)" }}` for zero runtime overhead.
-5. **No Runtime Animation Library** — Framer Motion is no longer used in the UI layer. All transitions are plain CSS `transition-colors duration-150`. This eliminates a ~50 kB gzip dependency from the interactive bundle.
-6. **Flat Panel System** — UI uses a 3-level background hierarchy (`--bg-base` → `--bg-panel` → `--bg-elevated`) with 1px solid borders instead of `backdrop-filter: blur()`. Renders faster on low-end devices and avoids GPU compositing layers.
-7. **Multi-Stage by Default** — For frameworks that support it, multi-stage builds are enabled by default to produce smaller, more secure production images.
+2. **MUI + Tailwind Hybrid** — MUI handles the layout shell (AppBar, Drawer, Tabs, Chips) while Tailwind + CSS custom properties continue powering the form components. This avoids a risky full rewrite.
+3. **MUI Dark Theme** — A custom `dockerCraftTheme` in `lib/theme.ts` uses Docker's brand blue (`#0db7ed`) as the primary color. All component overrides are centralized in the theme for consistency.
+4. **Client ThemeProvider Wrapper** — MUI's `ThemeProvider` uses React Context (client-only). It's wrapped in `MuiThemeProvider.tsx` (a `"use client"` component) and imported into the server `layout.tsx`, following Next.js App Router conventions.
+5. **Framework-Specific Generators** — Each framework has its own dedicated generator function in `lib/generators/dockerfile.ts`, making it easy to add or modify framework support.
+6. **Template-Driven Defaults** — `lib/generators/templates.ts` stores all framework metadata (default versions, ports, commands) separately from generation logic.
+7. **CSS Custom Properties Design System** — All colors are defined as CSS variables (`--bg-base`, `--bg-panel`, `--border`, `--accent`, etc.) in `globals.css`. These co-exist with the MUI theme's `sx` prop styling.
+8. **No Runtime Animation Library** — Framer Motion is no longer used in the UI layer. All transitions are plain CSS. This eliminates a ~50 kB gzip dependency from the interactive bundle.
 
 ---
 
@@ -316,6 +342,16 @@ Contributions are very welcome! Here's how to get started:
 
 ## 📝 Changelog
 
+### v1.3.0 — MUI Theme + Docker Docs Panel
+- 🎨 **MUI v5 integration** — Added `@mui/material`, `@mui/icons-material`, `@emotion/react`, `@emotion/styled`
+- 🧭 **MUI AppBar navigation** — Replaced legacy `<header>` with MUI `AppBar` + `Toolbar`; added MUI `Tabs` for Dockerfile/Compose switching with animated indicator
+- 📚 **Docker Docs side drawer** — Right-side `Drawer` with 5 sections: Dockerfile directives (12), Compose keys (10), Quick commands (10), Best practices (8), Multi-stage build example
+- 🎨 **Custom dark MUI theme** — `src/lib/theme.ts` with Docker blue (`#0db7ed`) primary, dark backgrounds, custom overrides for AppBar, Tabs, Chip, Paper, Drawer, Tooltip, Accordion
+- 🧩 **MuiThemeProvider wrapper** — Client component wrapper following Next.js App Router `"use client"` conventions
+- 💡 **Enhanced sub-header** — Version badge and description in slim sub-header bar
+- 🔗 **Tooltip labels** — MUI Tooltips on all icon buttons in the navbar
+- ⚡ **Pulse animation** — Animated live status indicator on AppBar and preview panel header
+
 ### v1.2.0 — UI Redesign (Minimal IDE)
 - 🖥️ **Complete UI redesign** — replaced glassmorphism/blur with a clean flat dark IDE aesthetic
 - 🎨 **CSS variable design system** — all UI colors via `--bg-base`, `--bg-panel`, `--border`, `--accent` tokens
@@ -344,7 +380,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](./LICEN
 
 <div align="center">
 
-Built with ❤️ using **Next.js** · **Tailwind CSS**
+Built with ❤️ using **Next.js** · **Material UI** · **Tailwind CSS**
 
 [⬆ Back to top](#-dockercraft)
 

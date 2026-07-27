@@ -1,15 +1,37 @@
 "use client";
 
 import { useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Tabs,
+  Tab,
+  IconButton,
+  Chip,
+  Tooltip,
+  Typography,
+  Paper,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import {
+  MenuBook,
+  GitHub,
+  FiberManualRecord,
+  Description as DescriptionIcon,
+  Layers as LayersIcon,
+  Settings as SettingsIcon,
+  Visibility,
+} from "@mui/icons-material";
 import { DockerfileForm } from "@/components/dockerfile/DockerfileForm";
 import { DockerfilePreview } from "@/components/dockerfile/DockerfilePreview";
 import { ComposeForm } from "@/components/compose/ComposeForm";
 import { ComposePreview } from "@/components/compose/ComposePreview";
+import { DockerDocsDrawer } from "@/components/shared/DockerDocsDrawer";
 import { DockerfileConfig } from "@/types/dockerfile";
 import { ComposeConfig } from "@/types/compose";
 import { cn } from "@/lib/utils";
 import { generateId } from "@/lib/utils";
-import { Container, Layers, Github, FileText, Settings, Eye } from "lucide-react";
 
 // ─── Default Configs ──────────────────────────────────────────────
 
@@ -80,251 +102,583 @@ const DEFAULT_COMPOSE_CONFIG: ComposeConfig = {
 type AppTab = "dockerfile" | "compose";
 type MobileView = "config" | "preview";
 
+const DOCKER_BLUE = "#0db7ed";
+const BG_PANEL = "#161b22";
+const BG_ELEVATED = "#1c2230";
+const BORDER = "#2a3344";
+const TEXT_PRIMARY = "#e6edf3";
+const TEXT_SECONDARY = "#7d8fa3";
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<AppTab>("dockerfile");
   const [mobileView, setMobileView] = useState<MobileView>("config");
   const [dockerfileConfig, setDockerfileConfig] = useState<DockerfileConfig>(DEFAULT_DOCKERFILE_CONFIG);
   const [composeConfig, setComposeConfig] = useState<ComposeConfig>(DEFAULT_COMPOSE_CONFIG);
+  const [docsOpen, setDocsOpen] = useState(false);
+
+  const STATS = [
+    { v: "15", l: "Frameworks" },
+    { v: "8", l: "Presets" },
+    { v: "v1.3", l: "Version" },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-base)" }}>
-
-      {/* ─── Header ─────────────────────────────────────────────── */}
-      <header style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-panel)" }}>
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
-
+    <Box
+      sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#0f1117" }}
+    >
+      {/* ─── MUI AppBar ───────────────────────────────────────────── */}
+      <AppBar position="sticky" elevation={0}>
+        <Toolbar
+          sx={{
+            maxWidth: 1600,
+            width: "100%",
+            mx: "auto",
+            px: { xs: 2, sm: 3 },
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            minHeight: "52px !important",
+          }}
+        >
           {/* Logo */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            <div
-              className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-              style={{ background: "var(--accent-dim)", border: "1px solid var(--accent-border)" }}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+            <Box
+              sx={{
+                width: 30,
+                height: 30,
+                borderRadius: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: alpha(DOCKER_BLUE, 0.15),
+                border: `1px solid ${alpha(DOCKER_BLUE, 0.3)}`,
+                fontSize: "15px",
+              }}
             >
-              <Container size={14} style={{ color: "var(--accent)" }} />
-            </div>
-            <div>
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>DockerCraft</span>
-              <span className="hidden sm:inline ml-2 text-xs" style={{ color: "var(--text-subtle)" }}>Dockerfile & Compose Generator</span>
-            </div>
-          </div>
+              🐳
+            </Box>
+            <Box>
+              <Typography
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "0.9rem",
+                  color: TEXT_PRIMARY,
+                  lineHeight: 1,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                DockerCraft
+              </Typography>
+              <Typography
+                component="span"
+                sx={{
+                  display: { xs: "none", md: "inline" },
+                  ml: 1.5,
+                  fontSize: "0.72rem",
+                  color: TEXT_SECONDARY,
+                }}
+              >
+                Dockerfile &amp; Compose Generator
+              </Typography>
+            </Box>
+          </Box>
 
-          {/* Tab Switcher */}
-          <div
-            className="hidden sm:flex items-center gap-1 p-1 rounded-md"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
-          >
-            <TabButton active={activeTab === "dockerfile"} onClick={() => setActiveTab("dockerfile")} icon={<FileText size={13} />} label="Dockerfile" />
-            <TabButton active={activeTab === "compose"} onClick={() => setActiveTab("compose")} icon={<Layers size={13} />} label="Compose" />
-          </div>
-
-          {/* Right */}
-          <div className="flex items-center gap-3">
-            <span
-              className="hidden md:flex items-center gap-1.5 text-xs px-2 py-1 rounded"
-              style={{ background: "var(--green-dim)", color: "var(--green)", border: "1px solid rgba(63,185,80,0.2)" }}
+          {/* MUI Tabs for Desktop */}
+          <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", ml: 2 }}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, v) => setActiveTab(v as AppTab)}
+              sx={{
+                "& .MuiTabs-indicator": {
+                  backgroundColor: DOCKER_BLUE,
+                  height: 2,
+                },
+              }}
             >
-              <span className="status-dot" />
-              Live
-            </span>
-            <a
+              <Tab
+                value="dockerfile"
+                icon={<DescriptionIcon sx={{ fontSize: 15 }} />}
+                iconPosition="start"
+                label="Dockerfile"
+                sx={{
+                  gap: 0.5,
+                  minHeight: 52,
+                  px: 2,
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  color: TEXT_SECONDARY,
+                  "&.Mui-selected": { color: DOCKER_BLUE },
+                }}
+              />
+              <Tab
+                value="compose"
+                icon={<LayersIcon sx={{ fontSize: 15 }} />}
+                iconPosition="start"
+                label="Compose"
+                sx={{
+                  gap: 0.5,
+                  minHeight: 52,
+                  px: 2,
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  color: TEXT_SECONDARY,
+                  "&.Mui-selected": { color: DOCKER_BLUE },
+                }}
+              />
+            </Tabs>
+          </Box>
+
+          {/* Spacer */}
+          <Box sx={{ flex: 1 }} />
+
+          {/* Stats chips (md+) */}
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 0.75 }}>
+            {STATS.map(({ v, l }) => (
+              <Chip
+                key={l}
+                label={
+                  <span>
+                    <span style={{ color: DOCKER_BLUE, fontWeight: 700 }}>{v}</span>
+                    {" "}{l}
+                  </span>
+                }
+                size="small"
+                sx={{
+                  background: BG_ELEVATED,
+                  border: `1px solid ${BORDER}`,
+                  color: TEXT_SECONDARY,
+                  fontSize: "0.68rem",
+                  height: 22,
+                }}
+              />
+            ))}
+          </Box>
+
+          {/* Live badge */}
+          <Chip
+            icon={<FiberManualRecord sx={{ fontSize: "8px !important", color: "#3fb950 !important", animation: "pulse 2s infinite" }} />}
+            label="Live"
+            size="small"
+            color="success"
+            sx={{ display: { xs: "none", sm: "flex" }, fontSize: "0.7rem", height: 22 }}
+          />
+
+          {/* Docs Button */}
+          <Tooltip title="Docker Reference Docs" placement="bottom">
+            <IconButton
+              size="small"
+              onClick={() => setDocsOpen(true)}
+              sx={{
+                color: TEXT_SECONDARY,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 1,
+                px: 1,
+                py: 0.5,
+                gap: 0.5,
+                height: 30,
+                "&:hover": {
+                  color: DOCKER_BLUE,
+                  borderColor: alpha(DOCKER_BLUE, 0.4),
+                  background: alpha(DOCKER_BLUE, 0.08),
+                },
+              }}
+            >
+              <MenuBook sx={{ fontSize: 15 }} />
+              <Typography
+                component="span"
+                sx={{ fontSize: "0.72rem", fontWeight: 500, display: { xs: "none", sm: "inline" } }}
+              >
+                Docs
+              </Typography>
+            </IconButton>
+          </Tooltip>
+
+          {/* GitHub */}
+          <Tooltip title="View on GitHub" placement="bottom">
+            <IconButton
+              size="small"
+              component="a"
               href="https://github.com/vitaltechmyanmar/DockerCraft"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors"
-              style={{ color: "var(--text-subtle)" }}
-              aria-label="View on GitHub"
+              sx={{ color: TEXT_SECONDARY, "&:hover": { color: TEXT_PRIMARY } }}
             >
-              <Github size={16} />
-            </a>
-          </div>
-        </div>
-      </header>
+              <GitHub sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+        </Toolbar>
 
-      {/* ─── Sub-header: breadcrumb + stats ─────────────────────── */}
-      <div style={{ borderBottom: "1px solid var(--border-muted)", background: "var(--bg-panel)" }}>
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-subtle)" }}>
-            <span>Generate production-ready Docker configurations</span>
-          </div>
-          <div className="flex items-center gap-4 text-xs" style={{ color: "var(--text-subtle)" }}>
-            {[
-              { v: "15", l: "Frameworks" },
-              { v: "8", l: "Presets" },
-              { v: "v1.1", l: "Version" },
-            ].map(({ v, l }) => (
-              <span key={l}>
-                <span className="font-semibold" style={{ color: "var(--accent)" }}>{v}</span>
-                {" "}{l}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ─── Mobile tab switcher ─────────────────────────────────── */}
-      <div className="sm:hidden px-3 pt-3">
-        <div
-          className="flex items-center gap-1 p-1 rounded-md w-full"
-          style={{ background: "var(--bg-panel)", border: "1px solid var(--border)" }}
+        {/* ─── Sub-header ─────────────────────────────────────────── */}
+        <Box
+          sx={{
+            borderTop: `1px solid ${alpha(BORDER, 0.6)}`,
+            background: alpha(BG_ELEVATED, 0.5),
+          }}
         >
-          <MobileTabButton active={activeTab === "dockerfile"} onClick={() => setActiveTab("dockerfile")} icon={<FileText size={13} />} label="Dockerfile" />
-          <MobileTabButton active={activeTab === "compose"} onClick={() => setActiveTab("compose")} icon={<Layers size={13} />} label="Compose" />
-        </div>
-      </div>
+          <Box
+            sx={{
+              maxWidth: 1600,
+              mx: "auto",
+              px: { xs: 2, sm: 3 },
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="caption" sx={{ color: TEXT_SECONDARY }}>
+              Generate production-ready Docker configurations instantly
+            </Typography>
+            <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1 }}>
+              <Typography variant="caption" sx={{ color: TEXT_SECONDARY }}>
+                v1.3.0 · MIT License
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </AppBar>
 
-      {/* ─── Mobile view toggle ──────────────────────────────────── */}
-      <div className="lg:hidden px-3 pt-2">
-        <div
-          className="flex items-center gap-1 p-1 rounded-md"
-          style={{ background: "var(--bg-panel)", border: "1px solid var(--border)" }}
+      {/* ─── Mobile Tab Switcher ──────────────────────────────────── */}
+      <Box sx={{ display: { xs: "block", sm: "none" }, px: 1.5, pt: 1.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 0.5,
+            p: 0.5,
+            borderRadius: 1,
+            background: BG_PANEL,
+            border: `1px solid ${BORDER}`,
+          }}
         >
-          <MobileViewButton active={mobileView === "config"} onClick={() => setMobileView("config")} icon={<Settings size={12} />} label="Configure" />
-          <MobileViewButton active={mobileView === "preview"} onClick={() => setMobileView("preview")} icon={<Eye size={12} />} label="Preview" />
-        </div>
-      </div>
+          <MobileTabBtn active={activeTab === "dockerfile"} onClick={() => setActiveTab("dockerfile")} label="Dockerfile" />
+          <MobileTabBtn active={activeTab === "compose"} onClick={() => setActiveTab("compose")} label="Compose" />
+        </Box>
+      </Box>
 
-      {/* ─── Main Content ────────────────────────────────────────── */}
-      <main className="flex-1 max-w-[1600px] mx-auto w-full px-3 sm:px-4 lg:px-6 py-4">
+      {/* ─── Mobile View Toggle ───────────────────────────────────── */}
+      <Box sx={{ display: { xs: "flex", lg: "none" }, px: 1.5, pt: 1, gap: 0.5, p: 0.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 0.5,
+            p: 0.5,
+            borderRadius: 1,
+            background: BG_PANEL,
+            border: `1px solid ${BORDER}`,
+            mx: 1.5,
+            mt: 1,
+          }}
+        >
+          <MobileViewBtn
+            active={mobileView === "config"}
+            onClick={() => setMobileView("config")}
+            icon={<SettingsIcon sx={{ fontSize: 13 }} />}
+            label="Configure"
+          />
+          <MobileViewBtn
+            active={mobileView === "preview"}
+            onClick={() => setMobileView("preview")}
+            icon={<Visibility sx={{ fontSize: 13 }} />}
+            label="Preview"
+          />
+        </Box>
+      </Box>
+
+      {/* ─── Main Content ─────────────────────────────────────────── */}
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          maxWidth: 1600,
+          mx: "auto",
+          width: "100%",
+          px: { xs: 1.5, sm: 2, lg: 3 },
+          py: 2,
+        }}
+      >
         {activeTab === "dockerfile" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: 1.5,
+              height: "100%",
+            }}
+          >
             {/* Config Panel */}
-            <div
-              className={cn("panel overflow-hidden", mobileView === "preview" ? "hidden lg:block" : "block")}
+            <Paper
+              sx={{
+                display: { xs: mobileView === "preview" ? "none" : "block", lg: "block" },
+                overflow: "hidden",
+                background: BG_PANEL,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 1.5,
+              }}
             >
-              <PanelHeader icon={<Settings size={12} />} title="Configuration" subtitle="Dockerfile options" />
-              <div className="p-4 sm:p-5">
+              <PanelHeader
+                icon={<SettingsIcon sx={{ fontSize: 13, color: DOCKER_BLUE }} />}
+                title="Configuration"
+                subtitle="Dockerfile options"
+              />
+              <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
                 <DockerfileForm config={dockerfileConfig} onChange={setDockerfileConfig} />
-              </div>
-            </div>
+              </Box>
+            </Paper>
 
             {/* Preview Panel */}
-            <div
-              className={cn(
-                "panel flex flex-col overflow-hidden min-h-[500px] sm:min-h-[600px]",
-                mobileView === "config" ? "hidden lg:flex" : "flex"
-              )}
+            <Paper
+              sx={{
+                display: { xs: mobileView === "config" ? "none" : "flex", lg: "flex" },
+                flexDirection: "column",
+                overflow: "hidden",
+                minHeight: { xs: 500, sm: 600 },
+                background: BG_PANEL,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 1.5,
+              }}
             >
-              <PanelHeader icon={<FileText size={12} />} title="Generated Output" subtitle="Real-time preview" live />
-              <div className="flex-1 overflow-hidden p-4 sm:p-5 pt-0">
+              <PanelHeader
+                icon={<DescriptionIcon sx={{ fontSize: 13, color: DOCKER_BLUE }} />}
+                title="Generated Output"
+                subtitle="Real-time preview"
+                live
+              />
+              <Box sx={{ flex: 1, overflow: "hidden", p: { xs: 2, sm: 2.5 }, pt: 0 }}>
                 <DockerfilePreview config={dockerfileConfig} />
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Paper>
+          </Box>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: 1.5,
+              height: "100%",
+            }}
+          >
             {/* Config Panel */}
-            <div
-              className={cn("panel overflow-hidden", mobileView === "preview" ? "hidden lg:block" : "block")}
+            <Paper
+              sx={{
+                display: { xs: mobileView === "preview" ? "none" : "block", lg: "block" },
+                overflow: "hidden",
+                background: BG_PANEL,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 1.5,
+              }}
             >
-              <PanelHeader icon={<Layers size={12} />} title="Services" subtitle="Multi-service stack" />
-              <div className="p-4 sm:p-5">
+              <PanelHeader
+                icon={<LayersIcon sx={{ fontSize: 13, color: DOCKER_BLUE }} />}
+                title="Services"
+                subtitle="Multi-service stack"
+              />
+              <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
                 <ComposeForm config={composeConfig} onChange={setComposeConfig} />
-              </div>
-            </div>
+              </Box>
+            </Paper>
 
             {/* Preview Panel */}
-            <div
-              className={cn(
-                "panel flex flex-col overflow-hidden min-h-[500px] sm:min-h-[600px]",
-                mobileView === "config" ? "hidden lg:flex" : "flex"
-              )}
+            <Paper
+              sx={{
+                display: { xs: mobileView === "config" ? "none" : "flex", lg: "flex" },
+                flexDirection: "column",
+                overflow: "hidden",
+                minHeight: { xs: 500, sm: 600 },
+                background: BG_PANEL,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 1.5,
+              }}
             >
-              <PanelHeader icon={<FileText size={12} />} title="Generated Output" subtitle="Real-time preview" live />
-              <div className="flex-1 overflow-hidden p-4 sm:p-5 pt-0">
+              <PanelHeader
+                icon={<DescriptionIcon sx={{ fontSize: 13, color: DOCKER_BLUE }} />}
+                title="Generated Output"
+                subtitle="Real-time preview"
+                live
+              />
+              <Box sx={{ flex: 1, overflow: "hidden", p: { xs: 2, sm: 2.5 }, pt: 0 }}>
                 <ComposePreview config={composeConfig} />
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Paper>
+          </Box>
         )}
-      </main>
+      </Box>
 
-      {/* ─── Footer ──────────────────────────────────────────────── */}
-      <footer style={{ borderTop: "1px solid var(--border)", background: "var(--bg-panel)" }}>
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between">
-          <p className="text-xs" style={{ color: "var(--text-subtle)" }}>
+      {/* ─── Footer ───────────────────────────────────────────────── */}
+      <Box
+        component="footer"
+        sx={{
+          borderTop: `1px solid ${BORDER}`,
+          background: BG_PANEL,
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: 1600,
+            mx: "auto",
+            px: { xs: 2, sm: 3 },
+            height: 40,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="caption" sx={{ color: TEXT_SECONDARY }}>
             Built with{" "}
-            <span style={{ color: "var(--accent)" }}>Next.js</span> ·{" "}
-            <span style={{ color: "var(--accent)" }}>Tailwind CSS</span>
-          </p>
-          <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-subtle)" }}>
-            <span>v1.1.0</span>
-            <span>·</span>
-            <span>MIT License</span>
-          </div>
-        </div>
-      </footer>
-    </div>
+            <Box component="span" sx={{ color: DOCKER_BLUE }}>Next.js</Box>
+            {" · "}
+            <Box component="span" sx={{ color: DOCKER_BLUE }}>MUI</Box>
+            {" · "}
+            <Box component="span" sx={{ color: DOCKER_BLUE }}>Tailwind CSS</Box>
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Typography variant="caption" sx={{ color: TEXT_SECONDARY }}>v1.3.0</Typography>
+            <Typography variant="caption" sx={{ color: BORDER }}>·</Typography>
+            <Typography variant="caption" sx={{ color: TEXT_SECONDARY }}>MIT License</Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* ─── Docker Docs Drawer ───────────────────────────────────── */}
+      <DockerDocsDrawer open={docsOpen} onClose={() => setDocsOpen(false)} />
+    </Box>
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────
+// ─── Sub-components ────────────────────────────────────────────────
 
-function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function PanelHeader({
+  icon,
+  title,
+  subtitle,
+  live,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  live?: boolean;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all duration-150",
-        active ? "tab-active" : "tab-inactive"
-      )}
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
+        px: 2,
+        py: 1.25,
+        borderBottom: `1px solid ${BORDER}`,
+      }}
     >
-      {icon}{label}
-    </button>
-  );
-}
-
-function MobileTabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex-1 flex items-center justify-center gap-2 py-2 rounded text-sm font-medium transition-all duration-150",
-        active ? "tab-active" : "tab-inactive"
-      )}
-    >
-      {icon}{label}
-    </button>
-  );
-}
-
-function MobileViewButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-all duration-150",
-        active ? "tab-active" : "tab-inactive"
-      )}
-    >
-      {icon}{label}
-    </button>
-  );
-}
-
-function PanelHeader({ icon, title, subtitle, live }: { icon: React.ReactNode; title: string; subtitle: string; live?: boolean }) {
-  return (
-    <div
-      className="flex items-center gap-3 px-4 py-3"
-      style={{ borderBottom: "1px solid var(--border)" }}
-    >
-      <div
-        className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
-        style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: 0.75,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: alpha(DOCKER_BLUE, 0.12),
+          border: `1px solid ${alpha(DOCKER_BLUE, 0.25)}`,
+          flexShrink: 0,
+        }}
       >
         {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{title}</p>
-        <p className="text-xs" style={{ color: "var(--text-subtle)" }}>{subtitle}</p>
-      </div>
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem", lineHeight: 1.2 }}>
+          {title}
+        </Typography>
+        <Typography variant="caption" sx={{ color: TEXT_SECONDARY, fontSize: "0.68rem" }}>
+          {subtitle}
+        </Typography>
+      </Box>
       {live && (
-        <div
-          className="flex items-center gap-1.5 text-xs px-2 py-0.5 rounded"
-          style={{ background: "var(--green-dim)", color: "var(--green)", border: "1px solid rgba(63,185,80,0.2)" }}
-        >
-          <span className="status-dot" style={{ width: 5, height: 5 }} />
-          Live
-        </div>
+        <Chip
+          icon={<FiberManualRecord sx={{ fontSize: "7px !important", color: "#3fb950 !important" }} />}
+          label="Live"
+          size="small"
+          color="success"
+          sx={{ fontSize: "0.65rem", height: 20 }}
+        />
       )}
-    </div>
+    </Box>
+  );
+}
+
+function MobileTabBtn({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <Box
+      component="button"
+      onClick={onClick}
+      sx={{
+        flex: 1,
+        py: 1,
+        px: 2,
+        borderRadius: 0.75,
+        border: "1px solid",
+        borderColor: active ? alpha(DOCKER_BLUE, 0.4) : "transparent",
+        background: active ? alpha(DOCKER_BLUE, 0.12) : "transparent",
+        color: active ? DOCKER_BLUE : TEXT_SECONDARY,
+        fontSize: "0.8rem",
+        fontWeight: 500,
+        cursor: "pointer",
+        transition: "all 0.15s",
+        "&:hover": {
+          color: active ? DOCKER_BLUE : TEXT_PRIMARY,
+        },
+      }}
+    >
+      {label}
+    </Box>
+  );
+}
+
+function MobileViewBtn({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <Box
+      component="button"
+      onClick={onClick}
+      sx={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 0.5,
+        py: 0.75,
+        px: 1.5,
+        borderRadius: 0.75,
+        border: "1px solid",
+        borderColor: active ? alpha(DOCKER_BLUE, 0.4) : "transparent",
+        background: active ? alpha(DOCKER_BLUE, 0.12) : "transparent",
+        color: active ? DOCKER_BLUE : TEXT_SECONDARY,
+        fontSize: "0.75rem",
+        fontWeight: 500,
+        cursor: "pointer",
+        transition: "all 0.15s",
+      }}
+    >
+      {icon}
+      {label}
+    </Box>
   );
 }
