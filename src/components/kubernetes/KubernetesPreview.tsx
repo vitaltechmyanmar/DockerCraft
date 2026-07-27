@@ -9,7 +9,7 @@ import {
   IconButton,
 } from "@mui/material";
 import {
-  CheckCircleOutline,
+  CheckCircle,
   ContentCopy,
   Download,
 } from "@mui/icons-material";
@@ -129,7 +129,7 @@ export function KubernetesPreview({ config }: KubernetesPreviewProps) {
           <Tooltip title="Copy">
             <IconButton size="small" onClick={handleCopy} sx={{ color: TEXT_SECONDARY, p: 0.75 }}>
               {copied ? (
-                <CheckCircleOutline sx={{ fontSize: 16, color: "#3fb950" }} />
+                <CheckCircle sx={{ fontSize: 16, color: "#3fb950" }} />
               ) : (
                 <ContentCopy sx={{ fontSize: 16 }} />
               )}

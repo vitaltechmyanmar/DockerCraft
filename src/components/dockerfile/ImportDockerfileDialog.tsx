@@ -92,11 +92,13 @@ export function ImportDockerfileDialog({
       onClose={handleClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: {
-          background: "var(--bg-panel)",
-          border: `1px solid ${BORDER}`,
-          borderRadius: 2,
+      slotProps={{
+        paper: {
+          sx: {
+            background: "var(--bg-panel)",
+            border: `1px solid ${BORDER}`,
+            borderRadius: 2,
+          },
         },
       }}
     >
@@ -191,7 +193,7 @@ export function ImportDockerfileDialog({
           >
             <AlertTitle sx={{ fontSize: "0.8rem" }}>Parse warnings</AlertTitle>
             {warnings.map((w, i) => (
-              <Typography key={i} variant="caption" display="block">{w}</Typography>
+              <Typography key={i} variant="caption" sx={{ display: "block" }}>{w}</Typography>
             ))}
           </Alert>
         )}
