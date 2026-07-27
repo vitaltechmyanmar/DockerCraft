@@ -20,7 +20,7 @@ const DEFAULT_DOCKERFILE_CONFIG: DockerfileConfig = {
   workdir: "/app",
   port: 3000,
   envVars: [],
-  buildCommand: "npm ci --only=production",
+  buildCommand: "npm ci --omit=dev",
   startCommand: "node server.js",
   multiStage: true,
   nonRootUser: true,

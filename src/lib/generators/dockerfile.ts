@@ -1,4 +1,4 @@
-import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
+﻿import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -30,21 +30,24 @@ function pkgMgrCommands(pm: JsPackageManager = "npm"): PkgCmds {
   switch (pm) {
     case "pnpm":
       return {
-        lockfiles: "package.json pnpm-lock.yaml ./",
+        // pnpm-lock.yaml* — copies if present, harmless if missing
+        lockfiles: "package.json pnpm-lock.yaml* ./",
         install: "RUN corepack enable && pnpm install --frozen-lockfile",
         installProd: "RUN corepack enable && pnpm install --frozen-lockfile --prod",
         build: "RUN pnpm run build",
       };
     case "yarn":
       return {
-        lockfiles: "package.json yarn.lock ./",
+        // yarn.lock* — copies if present, harmless if missing
+        lockfiles: "package.json yarn.lock* ./",
         install: "RUN yarn install --frozen-lockfile",
         installProd: "RUN yarn install --frozen-lockfile --production",
         build: "RUN yarn build",
       };
     case "bun":
       return {
-        lockfiles: "package.json bun.lockb ./",
+        // bun.lockb* — copies if present, harmless if missing
+        lockfiles: "package.json bun.lockb* ./",
         install: "RUN bun install --frozen-lockfile",
         installProd: "RUN bun install --frozen-lockfile --production",
         build: "RUN bun run build",
@@ -52,9 +55,10 @@ function pkgMgrCommands(pm: JsPackageManager = "npm"): PkgCmds {
     case "npm":
     default:
       return {
-        lockfiles: "package*.json ./",
-        install: "RUN npm ci",
-        installProd: "RUN npm ci --only=production",
+        // package-lock.json* — copies if present; fallback to npm install if missing
+        lockfiles: "package.json package-lock.json* ./",
+        install: "RUN [ -f package-lock.json ] && npm ci || npm install",
+        installProd: "RUN [ -f package-lock.json ] && npm ci --omit=dev || npm install --omit=dev",
         build: "RUN npm run build",
       };
   }
@@ -82,7 +86,7 @@ FROM node:${baseTag} AS builder
 WORKDIR ${config.workdir}
 COPY --from=deps ${config.workdir}/node_modules ./node_modules
 COPY . .
-RUN ${config.buildCommand}
+${pm.build}
 
 # ─── Stage 3: Runner ──────────────────────────────────────────────
 FROM node:${baseTag} AS runner
@@ -90,7 +94,7 @@ WORKDIR ${config.workdir}
 ENV NODE_ENV=production${envVarsBlock(config)}
 ${config.nonRootUser ? `RUN addgroup --system --gid 1001 appgroup && \\\n    adduser --system --uid 1001 --ingroup appgroup appuser\n` : ""}
 COPY --from=builder ${config.workdir}/node_modules ./node_modules
-COPY --from=builder ${config.workdir} .
+COPY --from=builder ${config.workdir}/package.json ./package.json
 ${config.nonRootUser ? "\nUSER appuser\n" : ""}
 EXPOSE ${config.port}
 CMD ["${config.startCommand.replace(/"/g, '\\"')}"]${healthCheckBlock(config)}`;
@@ -117,7 +121,6 @@ function generateNextjs(config: DockerfileConfig): string {
 
   return `# ─── Stage 1: Dependencies ────────────────────────────────────────
 FROM node:${baseTag} AS deps
-RUN apk add --no-cache libc6-compat 2>/dev/null || true
 WORKDIR ${config.workdir}
 COPY ${pm.lockfiles}
 ${pm.install}
@@ -174,7 +177,7 @@ function generateBun(config: DockerfileConfig): string {
 WORKDIR ${config.workdir}
 
 FROM base AS deps
-COPY package*.json bun.lockb ./
+COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile --production
 
 FROM base AS runner
@@ -192,7 +195,7 @@ function generateDeno(config: DockerfileConfig): string {
   return `FROM denoland/deno:${config.version}
 WORKDIR ${config.workdir}
 ${envVarsBlock(config)}
-${config.nonRootUser ? `RUN addgroup --system --gid 1001 denogroup && \\\n    adduser --system --uid 1001 --ingroup denogroup denouser\n` : ""}
+${config.nonRootUser ? `RUN groupadd --system --gid 1001 denogroup && \\\n    useradd --system --uid 1001 --gid denogroup denouser\n` : ""}
 # Cache dependencies (runs deno cache on entry point)
 COPY . .
 RUN ${config.buildCommand}
@@ -208,12 +211,18 @@ function generatePython(config: DockerfileConfig): string {
     ? `${config.version}-slim`
     : config.version;
 
+  // Alpine uses busybox addgroup/adduser; slim/full Debian uses groupadd/useradd
+  const isAlpine = config.baseImage === "alpine";
+  const addUserCmd = isAlpine
+    ? `RUN addgroup -S appgroup && adduser -S -G appgroup appuser`
+    : `RUN groupadd --system appgroup && useradd --system --gid appgroup appuser`;
+
   return `FROM python:${baseTag}
 WORKDIR ${config.workdir}
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1${envVarsBlock(config)}
-${config.nonRootUser ? `RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser\n` : ""}
+${config.nonRootUser ? `${addUserCmd}\n` : ""}
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \\
     pip install --no-cache-dir -r requirements.txt
@@ -289,7 +298,6 @@ function generatePhpLaravel(config: DockerfileConfig): string {
   return `FROM php:${config.version}-fpm-alpine
 WORKDIR ${config.workdir}
 ${envVarsBlock(config)}
-
 RUN apk add --no-cache \\
     git \\
     curl \\
@@ -302,12 +310,11 @@ RUN apk add --no-cache \\
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY composer*.json ./
-RUN composer install --no-dev --no-scripts --no-autoloader
+# Install without scripts/autoloader first (avoids APP_KEY / DB requirements at build time)
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 COPY . .
-RUN composer dump-autoload --optimize && \\
-    php artisan config:cache && \\
-    php artisan route:cache
+RUN composer dump-autoload --optimize
 ${config.nonRootUser ? `\nRUN chown -R www-data:www-data storage bootstrap/cache\nUSER www-data\n` : ""}
 EXPOSE ${config.port}
 CMD ["php-fpm"]${healthCheckBlock(config)}`;
@@ -361,9 +368,10 @@ RUN apk add --no-cache \\
     yarn \\
     tzdata
 ${envVarsBlock(config)}
-
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --deployment --without development test
+# Bundler 2+: --deployment is deprecated; use bundle config instead
+RUN bundle config set --local without 'development test' && \\
+    bundle install --jobs 4 --retry 3
 
 COPY . .
 RUN bundle exec rails assets:precompile

@@ -10,7 +10,7 @@ export const FRAMEWORK_TEMPLATES: Record<FrameworkId, FrameworkTemplate> = {
     defaultVersion: "20",
     versions: ["20", "18", "16", "21"],
     defaultPort: 3000,
-    defaultBuildCmd: "npm ci --only=production",
+    defaultBuildCmd: "npm ci --omit=dev",
     defaultStartCmd: "node server.js",
     defaultWorkdir: "/app",
     supportsMultiStage: true,
