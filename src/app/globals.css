@@ -2,8 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── CSS Custom Properties ─────────────────────────────────────── */
-:root {
+/* ─── CSS Custom Properties — Dark (default) ────────────────────── */
+:root,
+[data-theme="dark"] {
   --bg-base:      #0f1117;
   --bg-panel:     #161b22;
   --bg-elevated:  #1c2230;
@@ -17,6 +18,30 @@
   --accent-border:rgba(13, 183, 237, 0.25);
   --green:        #3fb950;
   --green-dim:    rgba(63, 185, 80, 0.12);
+  --shadow:       rgba(0, 0, 0, 0.4);
+}
+
+/* ─── CSS Custom Properties — Light ─────────────────────────────── */
+[data-theme="light"] {
+  --bg-base:      #f0f4f8;
+  --bg-panel:     #ffffff;
+  --bg-elevated:  #edf2f7;
+  --border:       #cbd5e0;
+  --border-muted: #e2e8f0;
+  --text-primary: #1a202c;
+  --text-muted:   #4a5568;
+  --text-subtle:  #a0aec0;
+  --accent:       #0099cc;
+  --accent-dim:   rgba(0, 153, 204, 0.10);
+  --accent-border:rgba(0, 153, 204, 0.30);
+  --green:        #38a169;
+  --green-dim:    rgba(56, 161, 105, 0.12);
+  --shadow:       rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Theme transition ───────────────────────────────────────────── */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }
 
 /* ─── Extra Small Breakpoint ────────────────────────────────────── */

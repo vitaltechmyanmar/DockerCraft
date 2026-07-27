@@ -43,7 +43,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-[#070d1a]">
+    <html lang="en" className="bg-[#070d1a]">
+      <head>
+        {/* Anti-flash: read theme from localStorage before first paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('dockercraft-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
       </body>
