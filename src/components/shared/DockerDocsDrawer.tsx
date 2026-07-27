@@ -1,30 +1,6 @@
 "use client";
 
-import {
-  Drawer,
-  Box,
-  Typography,
-  IconButton,
-  Divider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Chip,
-  Link,
-  Tooltip,
-} from "@mui/material";
-import {
-  Close,
-  ExpandMore,
-  OpenInNew,
-  Code,
-  Description,
-  Settings,
-  AccountTree,
-  Security,
-  Layers,
-} from "@mui/icons-material";
-import { alpha } from "@mui/material/styles";
+import { ChevronDown, X, ExternalLink, Code, FileText, Lock, Layers } from "lucide-react";
 import { useState } from "react";
 
 interface DockerDocsDrawerProps {
@@ -33,10 +9,6 @@ interface DockerDocsDrawerProps {
 }
 
 const DOCKER_BLUE = "#0db7ed";
-const BG_ELEVATED = "#1c2230";
-const BORDER = "#2a3344";
-const TEXT_PRIMARY = "#e6edf3";
-const TEXT_SECONDARY = "#7d8fa3";
 
 // ─── Data ──────────────────────────────────────────────────────────
 
@@ -238,111 +210,113 @@ const EXTERNAL_LINKS = [
 
 function CodeSnippet({ code }: { code: string }) {
   return (
-    <Box
-      component="pre"
-      sx={{
-        fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
-        fontSize: "0.7rem",
-        background: "#0f1117",
-        border: `1px solid ${BORDER}`,
-        borderRadius: 1,
-        p: 1,
-        mt: 0.5,
-        overflowX: "auto",
-        color: DOCKER_BLUE,
-        lineHeight: 1.5,
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word",
-      }}
-    >
+    <pre className="mt-2 rounded border border-gray-700 bg-black p-3 text-sm font-mono text-blue-400 overflow-x-auto whitespace-pre-wrap break-words leading-relaxed">
       {code}
-    </Box>
+    </pre>
   );
 }
 
 function DirectiveCard({ item }: { item: typeof DOCKERFILE_DIRECTIVES[0] }) {
   return (
-    <Box
-      sx={{
-        borderLeft: `3px solid ${item.color}`,
-        pl: 1.5,
-        py: 0.5,
-        mb: 1.5,
-        background: alpha(item.color, 0.04),
-        borderRadius: "0 4px 4px 0",
+    <div
+      className="mb-4 border-l-4 pl-4 py-2 rounded-r"
+      style={{
+        borderColor: item.color,
+        backgroundColor: item.color + "0a",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            fontFamily: "monospace",
-            fontWeight: 700,
-            color: item.color,
-            fontSize: "0.75rem",
-          }}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span
+          className="text-xs font-mono font-bold"
+          style={{ color: item.color }}
         >
           {item.name}
-        </Typography>
-        <Tooltip title="View official docs" placement="top">
-          <Link
-            href={item.docs}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{ display: "flex", alignItems: "center", ml: "auto" }}
-          >
-            <OpenInNew sx={{ fontSize: 12, color: TEXT_SECONDARY, "&:hover": { color: DOCKER_BLUE } }} />
-          </Link>
-        </Tooltip>
-      </Box>
-      <Typography variant="caption" sx={{ color: TEXT_SECONDARY, display: "block", fontSize: "0.7rem", mb: 0.5 }}>
-        {item.description}
-      </Typography>
+        </span>
+        <a
+          href={item.docs}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center ml-auto text-gray-500 hover:text-blue-400 transition"
+          title="View official docs"
+        >
+          <ExternalLink size={12} />
+        </a>
+      </div>
+      <p className="text-xs text-gray-400 mb-2 block">{item.description}</p>
       <CodeSnippet code={item.example} />
-    </Box>
+    </div>
   );
 }
 
 function ComposeKeyCard({ item }: { item: typeof COMPOSE_KEYS[0] }) {
   return (
-    <Box
-      sx={{
-        borderLeft: `3px solid ${item.color}`,
-        pl: 1.5,
-        py: 0.5,
-        mb: 1.5,
-        background: alpha(item.color, 0.04),
-        borderRadius: "0 4px 4px 0",
+    <div
+      className="mb-4 border-l-4 pl-4 py-2 rounded-r"
+      style={{
+        borderColor: item.color,
+        backgroundColor: item.color + "0a",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            fontFamily: "monospace",
-            fontWeight: 700,
-            color: item.color,
-            fontSize: "0.75rem",
-          }}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span
+          className="text-xs font-mono font-bold"
+          style={{ color: item.color }}
         >
           {item.name}
-        </Typography>
-        <Tooltip title="View official docs" placement="top">
-          <Link
-            href={item.docs}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{ display: "flex", alignItems: "center", ml: "auto" }}
-          >
-            <OpenInNew sx={{ fontSize: 12, color: TEXT_SECONDARY, "&:hover": { color: DOCKER_BLUE } }} />
-          </Link>
-        </Tooltip>
-      </Box>
-      <Typography variant="caption" sx={{ color: TEXT_SECONDARY, display: "block", fontSize: "0.7rem", mb: 0.5 }}>
-        {item.description}
-      </Typography>
+        </span>
+        <a
+          href={item.docs}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center ml-auto text-gray-500 hover:text-blue-400 transition"
+          title="View official docs"
+        >
+          <ExternalLink size={12} />
+        </a>
+      </div>
+      <p className="text-xs text-gray-400 mb-2 block">{item.description}</p>
       <CodeSnippet code={item.example} />
-    </Box>
+    </div>
+  );
+}
+
+function AccordionItem({
+  title,
+  icon,
+  badge,
+  expanded,
+  onToggle,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  badge?: number;
+  expanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="border border-gray-700 rounded overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full px-3 py-2 bg-gray-900 hover:bg-gray-800 transition flex items-center gap-2 text-left"
+      >
+        <ChevronDown
+          size={16}
+          className={`flex-shrink-0 text-gray-400 transition-transform ${expanded ? "rotate-180" : ""}`}
+        />
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="flex-shrink-0">{icon}</span>
+          <span className="text-sm font-semibold text-gray-200">{title}</span>
+          {badge !== undefined && (
+            <span className="ml-auto flex-shrink-0 px-2 py-0.5 bg-gray-700 text-xs text-gray-300 rounded">
+              {badge}
+            </span>
+          )}
+        </div>
+      </button>
+      {expanded && <div className="p-3 border-t border-gray-700 bg-gray-950">{children}</div>}
+    </div>
   );
 }
 
@@ -351,280 +325,147 @@ function ComposeKeyCard({ item }: { item: typeof COMPOSE_KEYS[0] }) {
 export function DockerDocsDrawer({ open, onClose }: DockerDocsDrawerProps) {
   const [expanded, setExpanded] = useState<string | false>("dockerfile-directives");
 
-  const handleChange = (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpanded(isExpanded ? panel : false);
-  };
+  if (!open) return null;
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} variant="temporary">
-      {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          px: 2,
-          py: 1.5,
-          borderBottom: `1px solid ${BORDER}`,
-          gap: 1,
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          background: "#161b22",
-        }}
-      >
-        <Box
-          sx={{
-            width: 28,
-            height: 28,
-            borderRadius: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: alpha(DOCKER_BLUE, 0.15),
-            border: `1px solid ${alpha(DOCKER_BLUE, 0.3)}`,
-            fontSize: "14px",
-            flexShrink: 0,
-          }}
-        >
-          🐳
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, lineHeight: 1.2 }}>
-            Docker Reference
-          </Typography>
-          <Typography variant="caption" sx={{ color: TEXT_SECONDARY }}>
-            Directives · Compose keys · Commands
-          </Typography>
-        </Box>
-        <IconButton size="small" onClick={onClose} sx={{ color: TEXT_SECONDARY }}>
-          <Close fontSize="small" />
-        </IconButton>
-      </Box>
+    <div className="fixed inset-0 z-50 flex">
+      {/* Backdrop */}
+      <div
+        className="flex-1 bg-black bg-opacity-50"
+        onClick={onClose}
+      />
 
-      {/* Body */}
-      <Box sx={{ overflowY: "auto", flex: 1, p: 1 }}>
+      {/* Drawer */}
+      <div className="w-96 max-w-full bg-gray-950 border-l border-gray-700 flex flex-col max-h-screen">
+        {/* Header */}
+        <div className="sticky top-0 z-10 border-b border-gray-700 bg-gray-900 p-4 flex items-center gap-3">
+          <div className="w-7 h-7 rounded flex items-center justify-center bg-blue-500 bg-opacity-10 border border-blue-500 border-opacity-30 text-base flex-shrink-0">
+            🐳
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold text-gray-100 leading-tight">
+              Docker Reference
+            </h2>
+            <p className="text-xs text-gray-400">
+              Directives · Compose keys · Commands
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-gray-200 transition flex-shrink-0"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
-        {/* External Links */}
-        <Box sx={{ p: 1, mb: 0.5 }}>
-          <Typography variant="caption" sx={{ color: TEXT_SECONDARY, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "0.65rem" }}>
-            Official Docs
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-            {EXTERNAL_LINKS.map((link) => (
-              <Chip
-                key={link.label}
-                label={`${link.icon} ${link.label}`}
-                component="a"
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                clickable
-                size="small"
-                sx={{
-                  fontSize: "0.68rem",
-                  height: 24,
-                  background: BG_ELEVATED,
-                  border: `1px solid ${BORDER}`,
-                  color: TEXT_SECONDARY,
-                  "&:hover": {
-                    background: alpha(DOCKER_BLUE, 0.1),
-                    color: DOCKER_BLUE,
-                    borderColor: alpha(DOCKER_BLUE, 0.4),
-                  },
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
+        {/* Body */}
+        <div className="overflow-y-auto flex-1 p-3 space-y-3">
+          {/* External Links */}
+          <div className="p-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Official Docs
+            </p>
+            <div className="flex flex-wrap gap-1 mt-2">
+              {EXTERNAL_LINKS.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-gray-800 border border-gray-700 text-gray-400 rounded hover:bg-blue-500 hover:bg-opacity-10 hover:text-blue-400 hover:border-blue-500 hover:border-opacity-40 transition"
+                >
+                  <span>{link.icon}</span>
+                  <span>{link.label}</span>
+                </a>
+              ))}
+            </div>
+          </div>
 
-        <Divider sx={{ my: 1 }} />
+          <hr className="border-gray-700" />
 
-        {/* Dockerfile Directives Accordion */}
-        <Accordion
-          expanded={expanded === "dockerfile-directives"}
-          onChange={handleChange("dockerfile-directives")}
-          sx={{ mb: 0.5 }}
-        >
-          <AccordionSummary expandIcon={<ExpandMore sx={{ fontSize: 18, color: TEXT_SECONDARY }} />}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Description sx={{ fontSize: 16, color: DOCKER_BLUE }} />
-              <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem" }}>
-                Dockerfile Directives
-              </Typography>
-              <Chip label={DOCKERFILE_DIRECTIVES.length} size="small" color="primary" />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 1, pb: 1, px: 1 }}>
-            {DOCKERFILE_DIRECTIVES.map((item) => (
-              <DirectiveCard key={item.name} item={item} />
-            ))}
-          </AccordionDetails>
-        </Accordion>
+          {/* Dockerfile Directives Accordion */}
+          <AccordionItem
+            title="Dockerfile Directives"
+            icon={<FileText size={16} className="text-blue-400" />}
+            badge={DOCKERFILE_DIRECTIVES.length}
+            expanded={expanded === "dockerfile-directives"}
+            onToggle={() => setExpanded(expanded === "dockerfile-directives" ? false : "dockerfile-directives")}
+          >
+            <div className="space-y-3">
+              {DOCKERFILE_DIRECTIVES.map((item) => (
+                <DirectiveCard key={item.name} item={item} />
+              ))}
+            </div>
+          </AccordionItem>
 
-        {/* Compose Keys Accordion */}
-        <Accordion
-          expanded={expanded === "compose-keys"}
-          onChange={handleChange("compose-keys")}
-          sx={{ mb: 0.5 }}
-        >
-          <AccordionSummary expandIcon={<ExpandMore sx={{ fontSize: 18, color: TEXT_SECONDARY }} />}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Layers sx={{ fontSize: 16, color: "#a78bfa" }} />
-              <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem" }}>
-                Compose Keys
-              </Typography>
-              <Chip label={COMPOSE_KEYS.length} size="small" sx={{ background: alpha("#a78bfa", 0.15), color: "#a78bfa", border: `1px solid ${alpha("#a78bfa", 0.3)}` }} />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 1, pb: 1, px: 1 }}>
-            {COMPOSE_KEYS.map((item) => (
-              <ComposeKeyCard key={item.name} item={item} />
-            ))}
-          </AccordionDetails>
-        </Accordion>
+          {/* Compose Keys Accordion */}
+          <AccordionItem
+            title="Compose Keys"
+            icon={<Layers size={16} style={{ color: "#a78bfa" }} />}
+            badge={COMPOSE_KEYS.length}
+            expanded={expanded === "compose-keys"}
+            onToggle={() => setExpanded(expanded === "compose-keys" ? false : "compose-keys")}
+          >
+            <div className="space-y-3">
+              {COMPOSE_KEYS.map((item) => (
+                <ComposeKeyCard key={item.name} item={item} />
+              ))}
+            </div>
+          </AccordionItem>
 
-        {/* Quick Commands Accordion */}
-        <Accordion
-          expanded={expanded === "quick-commands"}
-          onChange={handleChange("quick-commands")}
-          sx={{ mb: 0.5 }}
-        >
-          <AccordionSummary expandIcon={<ExpandMore sx={{ fontSize: 18, color: TEXT_SECONDARY }} />}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Code sx={{ fontSize: 16, color: "#34d399" }} />
-              <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem" }}>
-                Quick Commands
-              </Typography>
-              <Chip label={QUICK_COMMANDS.length} size="small" sx={{ background: alpha("#34d399", 0.12), color: "#34d399", border: `1px solid ${alpha("#34d399", 0.3)}` }} />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 1, pb: 1, px: 1 }}>
-            {QUICK_COMMANDS.map((item) => (
-              <Box key={item.cmd} sx={{ mb: 1.5 }}>
-                <Typography variant="caption" sx={{ color: TEXT_SECONDARY, fontSize: "0.7rem" }}>
-                  {item.desc}
-                </Typography>
-                <CodeSnippet code={item.cmd} />
-              </Box>
-            ))}
-          </AccordionDetails>
-        </Accordion>
+          {/* Quick Commands Accordion */}
+          <AccordionItem
+            title="Quick Commands"
+            icon={<Code size={16} style={{ color: "#34d399" }} />}
+            badge={QUICK_COMMANDS.length}
+            expanded={expanded === "quick-commands"}
+            onToggle={() => setExpanded(expanded === "quick-commands" ? false : "quick-commands")}
+          >
+            <div className="space-y-3">
+              {QUICK_COMMANDS.map((item) => (
+                <div key={item.cmd}>
+                  <p className="text-xs text-gray-400 mb-2">{item.desc}</p>
+                  <CodeSnippet code={item.cmd} />
+                </div>
+              ))}
+            </div>
+          </AccordionItem>
 
-        {/* Best Practices Accordion */}
-        <Accordion
-          expanded={expanded === "best-practices"}
-          onChange={handleChange("best-practices")}
-          sx={{ mb: 0.5 }}
-        >
-          <AccordionSummary expandIcon={<ExpandMore sx={{ fontSize: 18, color: TEXT_SECONDARY }} />}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Security sx={{ fontSize: 16, color: "#fbbf24" }} />
-              <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem" }}>
-                Best Practices
-              </Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 1, pb: 1, px: 1 }}>
-            {[
-              { tip: "Use multi-stage builds", detail: "Separate build and runtime stages to keep the final image lean. Only copy the built artifacts to the runner stage." },
-              { tip: "Run as non-root user", detail: "Create and switch to a non-root user with USER instruction to reduce attack surface." },
-              { tip: "Use .dockerignore", detail: "Exclude node_modules, .git, logs, and other unnecessary files to speed up builds and reduce image size." },
-              { tip: "Minimize layers", detail: "Chain RUN commands with && to reduce the number of layers. More layers = larger image." },
-              { tip: "Use specific base image tags", detail: "Avoid latest tag. Use specific version tags like node:20-alpine to ensure reproducibility." },
-              { tip: "Copy package files first", detail: "COPY package*.json ./ then RUN npm ci before copying source — this leverages Docker's layer cache for faster builds." },
-              { tip: "Prefer alpine images", detail: "Alpine-based images are 5-10x smaller than debian-based ones. Use -alpine variants when available." },
-              { tip: "Set HEALTHCHECK", detail: "Add a HEALTHCHECK so Docker can restart unhealthy containers automatically." },
-            ].map(({ tip, detail }) => (
-              <Box key={tip} sx={{ borderLeft: `3px solid #fbbf24`, pl: 1.5, py: 0.5, mb: 1.5, background: alpha("#fbbf24", 0.04), borderRadius: "0 4px 4px 0" }}>
-                <Typography variant="caption" sx={{ color: "#fbbf24", fontWeight: 600, display: "block", fontSize: "0.75rem", mb: 0.25 }}>
-                  ✓ {tip}
-                </Typography>
-                <Typography variant="caption" sx={{ color: TEXT_SECONDARY, display: "block", fontSize: "0.7rem" }}>
-                  {detail}
-                </Typography>
-              </Box>
-            ))}
-          </AccordionDetails>
-        </Accordion>
-
-        {/* Multi-Stage Builds Accordion */}
-        <Accordion
-          expanded={expanded === "multi-stage"}
-          onChange={handleChange("multi-stage")}
-          sx={{ mb: 1 }}
-        >
-          <AccordionSummary expandIcon={<ExpandMore sx={{ fontSize: 18, color: TEXT_SECONDARY }} />}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <AccountTree sx={{ fontSize: 16, color: "#818cf8" }} />
-              <Typography variant="body2" fontWeight={600} sx={{ color: TEXT_PRIMARY, fontSize: "0.8rem" }}>
-                Multi-Stage Build Example
-              </Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 1, pb: 1, px: 1 }}>
-            <Typography variant="caption" sx={{ color: TEXT_SECONDARY, display: "block", mb: 1, fontSize: "0.7rem" }}>
-              A typical Node.js multi-stage build with separate deps, builder, and runner stages:
-            </Typography>
-            <CodeSnippet code={`FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npm run build
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-COPY --chown=appuser:appgroup --from=builder /app/dist ./dist
-COPY --chown=appuser:appgroup --from=deps /app/node_modules ./node_modules
-USER appuser
-EXPOSE 3000
-CMD ["node", "dist/server.js"]`} />
-            <Box sx={{ mt: 1.5 }}>
-              <Chip
-                label="📖 Multi-stage builds guide"
-                component="a"
-                href="https://docs.docker.com/build/building/multi-stage/"
-                target="_blank"
-                rel="noopener noreferrer"
-                clickable
-                size="small"
-                sx={{
-                  fontSize: "0.68rem",
-                  background: alpha("#818cf8", 0.1),
-                  color: "#818cf8",
-                  border: `1px solid ${alpha("#818cf8", 0.3)}`,
-                  "&:hover": { background: alpha("#818cf8", 0.2) },
-                }}
-              />
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-
-      {/* Footer */}
-      <Box
-        sx={{
-          borderTop: `1px solid ${BORDER}`,
-          px: 2,
-          py: 1,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <Typography variant="caption" sx={{ color: TEXT_SECONDARY, fontSize: "0.65rem" }}>
-          Official documentation at{" "}
-          <Link href="https://docs.docker.com" target="_blank" rel="noopener noreferrer" sx={{ color: DOCKER_BLUE }}>
-            docs.docker.com
-          </Link>
-        </Typography>
-      </Box>
-    </Drawer>
+          {/* Best Practices Accordion */}
+          <AccordionItem
+            title="Best Practices"
+            icon={<Lock size={16} style={{ color: "#fbbf24" }} />}
+            expanded={expanded === "best-practices"}
+            onToggle={() => setExpanded(expanded === "best-practices" ? false : "best-practices")}
+          >
+            <div className="space-y-3">
+              {[
+                { tip: "Use multi-stage builds", detail: "Separate build and runtime stages to keep the final image lean. Only copy the built artifacts to the runner stage." },
+                { tip: "Run as non-root user", detail: "Create and switch to a non-root user with USER instruction to reduce attack surface." },
+                { tip: "Use .dockerignore", detail: "Exclude node_modules, .git, logs, and other unnecessary files to speed up builds and reduce image size." },
+                { tip: "Minimize layers", detail: "Chain RUN commands with && to reduce the number of layers. More layers = larger image." },
+                { tip: "Use specific base image tags", detail: "Avoid latest tag. Use specific version tags like node:20-alpine to ensure reproducibility." },
+                { tip: "Copy package files first", detail: "COPY package*.json ./ then RUN npm ci before copying source — this leverages Docker's layer cache for faster builds." },
+                { tip: "Prefer alpine images", detail: "Alpine-based images are 5-10x smaller than debian-based ones. Use -alpine variants when available." },
+                { tip: "Set HEALTHCHECK", detail: "Add a HEALTHCHECK so Docker can restart unhealthy containers automatically." },
+              ].map(({ tip, detail }) => (
+                <div
+                  key={tip}
+                  className="border-l-4 pl-4 py-2 rounded-r"
+                  style={{
+                    borderColor: "#fbbf24",
+                    backgroundColor: "#fbbf2408",
+                  }}
+                >
+                  <p className="text-xs font-semibold text-yellow-400 mb-1">✓ {tip}</p>
+                  <p className="text-xs text-gray-400">{detail}</p>
+                </div>
+              ))}
+            </div>
+          </AccordionItem>
+        </div>
+      </div>
+    </div>
   );
 }
