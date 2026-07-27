@@ -4,7 +4,6 @@ import { ServiceCard } from "./ServiceCard";
 import { generateId } from "@/lib/utils";
 import { Plus, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface ComposeFormProps {
   config: ComposeConfig;
@@ -30,16 +29,8 @@ function createDefaultService(): ServiceConfig {
   };
 }
 
-function Input({
-  id,
-  value,
-  onChange,
-  placeholder,
-}: {
-  id?: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
+function Input({ id, value, onChange, placeholder }: {
+  id?: string; value: string; onChange: (v: string) => void; placeholder?: string;
 }) {
   return (
     <input
@@ -47,11 +38,26 @@ function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={cn(
-        "w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-600",
-        "focus:outline-none focus:border-docker-blue/50 focus:ring-1 focus:ring-docker-blue/20 transition-all duration-200"
-      )}
+      className="w-full rounded px-3 py-2 text-sm transition-colors duration-150"
+      style={{
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border)",
+        color: "var(--text-primary)",
+        outline: "none",
+      }}
+      onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+      onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
     />
+  );
+}
+
+function Divider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-px flex-1" style={{ background: "var(--border-muted)" }} />
+      <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-subtle)" }}>{label}</span>
+      <div className="h-px flex-1" style={{ background: "var(--border-muted)" }} />
+    </div>
   );
 }
 
@@ -79,26 +85,21 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
   const allServiceNames = config.services.map((s) => s.name).filter(Boolean);
 
   return (
-    <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 280px)" }}>
-      {/* Project Config */}
-      <div className="space-y-3 p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/[0.08]">
-        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Project Settings</h3>
+    <div className="space-y-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(100vh - 260px)" }}>
+
+      {/* Project Settings */}
+      <div className="space-y-3">
+        <Divider label="Project Settings" />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Project Name</label>
-            <Input
-              id="project-name"
-              value={config.projectName}
-              onChange={(v) => update("projectName", v)}
-              placeholder="my-project"
-            />
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }}>Project Name</label>
+            <Input id="project-name" value={config.projectName} onChange={(v) => update("projectName", v)} placeholder="my-project" />
           </div>
           <div>
             <label
-              className={cn(
-                "block text-xs font-medium mb-1.5 transition-colors",
-                config.useV2Spec ? "text-slate-600 line-through" : "text-slate-400"
-              )}
+              className="block text-xs font-medium mb-1 transition-colors"
+              style={{ color: config.useV2Spec ? "var(--text-subtle)" : "var(--text-muted)", textDecoration: config.useV2Spec ? "line-through" : "none" }}
             >
               Compose Version
             </label>
@@ -106,87 +107,98 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
               value={config.version}
               disabled={config.useV2Spec}
               onChange={(e) => update("version", e.target.value)}
-              className={cn(
-                "w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm [&>option]:bg-slate-900 focus:outline-none focus:border-docker-blue/50 transition-all",
-                config.useV2Spec ? "text-slate-600 cursor-not-allowed opacity-50" : "text-slate-200"
-              )}
+              className="w-full rounded px-3 py-2 text-sm transition-all"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border)",
+                color: config.useV2Spec ? "var(--text-subtle)" : "var(--text-primary)",
+                outline: "none",
+                opacity: config.useV2Spec ? 0.5 : 1,
+                cursor: config.useV2Spec ? "not-allowed" : "default",
+              }}
             >
-              <option value="3.9">3.9 (latest)</option>
-              <option value="3.8">3.8</option>
-              <option value="3.7">3.7</option>
+              <option value="3.9" style={{ background: "var(--bg-panel)" }}>3.9 (latest)</option>
+              <option value="3.8" style={{ background: "var(--bg-panel)" }}>3.8</option>
+              <option value="3.7" style={{ background: "var(--bg-panel)" }}>3.7</option>
             </select>
           </div>
         </div>
 
-        {/* Compose v2 spec toggle */}
+        {/* Compose v2 toggle */}
         <div
-          className="flex items-center justify-between gap-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] cursor-pointer hover:bg-white/[0.05] transition-all duration-200 active:scale-[0.99]"
+          className="flex items-center justify-between gap-4 px-3 py-2.5 rounded cursor-pointer transition-colors duration-150"
+          style={{
+            border: "1px solid var(--border)",
+            background: config.useV2Spec ? "rgba(13,183,237,0.04)" : "var(--bg-elevated)",
+          }}
           onClick={() => update("useV2Spec", !config.useV2Spec)}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && update("useV2Spec", !config.useV2Spec)}
         >
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-200">Use Compose v2 Spec</p>
-            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-              Omits the <code className="font-mono text-docker-blue">version:</code> field (modern Compose Spec standard)
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Use Compose v2 Spec</p>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-subtle)" }}>
+              Omits the <code className="font-mono" style={{ color: "var(--accent)" }}>version:</code> field (modern standard)
             </p>
           </div>
           <div
-            className={cn(
-              "relative w-10 h-5 rounded-full transition-colors duration-200 flex-shrink-0",
-              config.useV2Spec ? "bg-docker-blue" : "bg-slate-700"
-            )}
+            className="relative w-9 h-5 rounded-full transition-colors duration-200 flex-shrink-0"
+            style={{ background: config.useV2Spec ? "var(--accent)" : "var(--border)" }}
           >
             <div
-              className={cn(
-                "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200",
-                config.useV2Spec ? "translate-x-5" : "translate-x-0.5"
-              )}
+              className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200"
+              style={{ transform: config.useV2Spec ? "translateX(18px)" : "translateX(2px)" }}
             />
           </div>
         </div>
       </div>
 
-      {/* Services Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Layers size={14} className="text-docker-blue" />
-          <span className="text-sm font-medium text-slate-300">Services</span>
-          <span className="px-2 py-0.5 rounded-full bg-docker-blue/10 border border-docker-blue/20 text-docker-blue text-xs font-bold">
-            {config.services.length}
-          </span>
-        </div>
-      </div>
-
-      {/* Services List */}
+      {/* Services */}
       <div className="space-y-3">
-        <AnimatePresence mode="popLayout">
-          {config.services.map((service, index) => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers size={13} style={{ color: "var(--accent)" }} />
+            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Services</span>
+            <span
+              className="px-1.5 py-0.5 rounded text-xs font-bold"
+              style={{ background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid var(--accent-border)" }}
             >
-              <ServiceCard
-                service={service}
-                allServiceNames={allServiceNames}
-                onChange={(updated) => updateService(index, updated)}
-                onRemove={() => removeService(index)}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+              {config.services.length}
+            </span>
+          </div>
+        </div>
 
-        <button
-          onClick={addService}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-docker-blue/30 text-docker-blue hover:bg-docker-blue/5 hover:border-docker-blue/50 transition-all duration-200 text-sm font-medium"
-        >
-          <Plus size={15} />
-          Add Service
-        </button>
+        <div className="space-y-2">
+          {config.services.map((service, index) => (
+            <ServiceCard
+              key={service.id}
+              service={service}
+              allServiceNames={allServiceNames}
+              onChange={(updated) => updateService(index, updated)}
+              onRemove={() => removeService(index)}
+            />
+          ))}
+
+          <button
+            onClick={addService}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-colors duration-150"
+            style={{ border: "1px dashed var(--border)", color: "var(--text-subtle)", background: "transparent" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "var(--accent-border)";
+              e.currentTarget.style.color = "var(--accent)";
+              e.currentTarget.style.background = "var(--accent-dim)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "var(--border)";
+              e.currentTarget.style.color = "var(--text-subtle)";
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <Plus size={13} />
+            Add Service
+          </button>
+        </div>
       </div>
     </div>
   );

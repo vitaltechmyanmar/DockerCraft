@@ -4,44 +4,36 @@
 
 /* ─── CSS Custom Properties ─────────────────────────────────────── */
 :root {
-  --background: 222 47% 5%;
-  --foreground: 210 40% 98%;
-  --primary: 198 100% 48%;
-  --primary-foreground: 222 47% 5%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 12%;
-  --muted-foreground: 215 20% 50%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  --border: 217 33% 15%;
-  --input: 217 33% 15%;
-  --ring: 198 100% 48%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 210 40% 98%;
+  --bg-base:      #0f1117;
+  --bg-panel:     #161b22;
+  --bg-elevated:  #1c2230;
+  --border:       #2a3344;
+  --border-muted: #1e2a3a;
+  --text-primary: #e6edf3;
+  --text-muted:   #7d8fa3;
+  --text-subtle:  #4a5568;
+  --accent:       #0db7ed;
+  --accent-dim:   rgba(13, 183, 237, 0.12);
+  --accent-border:rgba(13, 183, 237, 0.25);
+  --green:        #3fb950;
+  --green-dim:    rgba(63, 185, 80, 0.12);
 }
 
-/* ─── Base Styles ───────────────────────────────────────────────── */
-* {
+/* ─── Base ───────────────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
-html,
-body {
+html, body {
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-html {
-  background-color: #070d1a;
-}
-
-body {
-  background-color: #070d1a;
-  color: rgb(var(--foreground));
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ─── Extra Small Breakpoint ────────────────────────────────────── */
@@ -53,81 +45,57 @@ body {
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border);
   border-radius: 100px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--border-muted);
 }
 
 /* ─── Selection ─────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(13, 183, 237, 0.3);
+  background: rgba(13, 183, 237, 0.25);
   color: white;
 }
 
-/* ─── Background Grid ───────────────────────────────────────────── */
-.grid-bg {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 40px 40px;
+/* ─── Panel Card ─────────────────────────────────────────────────── */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
-@media (min-width: 768px) {
-  .grid-bg {
-    background-size: 50px 50px;
-  }
+.panel-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
-/* ─── Glassmorphism ─────────────────────────────────────────────── */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+/* ─── Accent highlight ───────────────────────────────────────────── */
+.accent-border-l {
+  border-left: 2px solid var(--accent);
 }
 
-.glass-strong {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+/* ─── Mono Tag ───────────────────────────────────────────────────── */
+.mono-tag {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 11px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--text-muted);
 }
 
-/* ─── Glow Effects ──────────────────────────────────────────────── */
-.glow-blue {
-  box-shadow: 0 0 20px rgba(13, 183, 237, 0.15), 0 0 40px rgba(13, 183, 237, 0.05);
-}
-
-.glow-text {
-  text-shadow: 0 0 40px rgba(13, 183, 237, 0.5);
-}
-
-/* ─── Gradient Text ─────────────────────────────────────────────── */
-.gradient-text {
-  background: linear-gradient(135deg, #0db7ed 0%, #a78bfa 50%, #0db7ed 100%);
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-shift 4s ease infinite;
-}
-
-@keyframes gradient-shift {
-  0% { background-position: 0% center; }
-  50% { background-position: 100% center; }
-  100% { background-position: 0% center; }
+/* ─── Status dot ─────────────────────────────────────────────────── */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
 }
 
 /* ─── Code Block Overrides ──────────────────────────────────────── */
@@ -135,49 +103,46 @@ pre[class*="language-"] {
   background: transparent !important;
 }
 
-/* ─── Animated Border ───────────────────────────────────────────── */
-@keyframes rotate {
-  100% { transform: rotate(1turn); }
-}
-
-.animated-border::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: conic-gradient(
-    from var(--angle, 0deg),
-    transparent 0deg,
-    #0db7ed 60deg,
-    transparent 120deg
-  );
-  animation: rotate 3s linear infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  padding: 1px;
-}
-
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-/* ─── Form element responsive tweaks ───────────────────────────── */
+/* ─── Form elements ──────────────────────────────────────────────── */
 input, select, textarea {
   -webkit-appearance: none;
   appearance: none;
 }
 
-/* Prevent zoom on mobile input focus (iOS) */
+/* Prevent iOS zoom on input focus */
 @media (max-width: 768px) {
   input, select, textarea {
     font-size: 16px !important;
   }
 }
 
-/* ─── Touch-friendly tap targets ───────────────────────────────── */
 button {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Subtle fade-in animation (only for initial load) ──────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.3s ease-out forwards;
+}
+
+/* ─── Active tab indicator ───────────────────────────────────────── */
+.tab-active {
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+}
+
+.tab-inactive {
+  color: var(--text-muted);
+  border: 1px solid transparent;
+}
+
+.tab-inactive:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.04);
 }

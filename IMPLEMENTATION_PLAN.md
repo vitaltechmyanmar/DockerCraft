@@ -121,29 +121,27 @@ These are ordered by priority. Each item includes implementation notes for contr
 
 #### 3.1 Add `.dockerignore` Download to Compose Tab
 
-- **Status**: Not started
+- **Status**: ✅ Completed (v1.1.0)
 - **File**: `src/components/compose/ComposePreview.tsx`
-- **Notes**: The Dockerfile tab already generates and downloads `.dockerignore`. The Compose tab should provide a generic `.dockerignore` as well.
+- **Notes**: Added a tab switcher (`docker-compose.yml` / `.dockerignore`) identical to the Dockerfile Preview pattern. `generateComposeDockerignore()` added to `lib/generators/compose.ts`.
 
 #### 3.2 Deno Framework Support
 
-- **Status**: Not started
-- **Files to edit**:
-  - `src/types/dockerfile.ts` — Add `"deno"` to `FrameworkId`
-  - `src/lib/generators/templates.ts` — Add template entry
-  - `src/lib/generators/dockerfile.ts` — Add `generateDeno()` function
-- **Notes**: Deno has its own runtime, no npm. Use `denoland/deno` base image.
+- **Status**: ✅ Completed (v1.1.0)
+- **Files edited**:
+  - `src/types/dockerfile.ts` — Added `"deno"` to `FrameworkId`
+  - `src/lib/generators/templates.ts` — Added template entry (`denoland/deno:2`, port 8000)
+  - `src/lib/generators/dockerfile.ts` — Added `generateDeno()` function and Deno `.dockerignore` entries
 
 #### 3.3 Docker Compose v3 → v2 Migration Option
 
-- **Status**: Not started
-- **Notes**: Docker Compose v2 spec removes `version:` field. Add a toggle to emit v2-compatible YAML (no `version:` key, no `links:` etc.)
+- **Status**: ✅ Completed (v1.1.0)
+- **Notes**: Added `useV2Spec: boolean` to `ComposeConfig`. When enabled, the `version:` key is omitted from YAML output and the version select is visually disabled. Toggle added to `ComposeForm.tsx` Project Settings section.
 
 #### 3.4 pnpm / yarn Support for Node.js Frameworks
 
-- **Status**: Not started
-- **File**: `src/lib/generators/dockerfile.ts`
-- **Notes**: Add a `packageManager` selector (npm/pnpm/yarn/bun) to `DockerfileForm`. Each option generates the appropriate `COPY lockfile` and `RUN install` lines.
+- **Status**: ✅ Completed (v1.1.0)
+- **Notes**: Added `packageManager?: JsPackageManager` (`"npm" | "pnpm" | "yarn" | "bun"`) to `DockerfileConfig`. A `pkgMgrCommands()` helper in `dockerfile.ts` maps each option to the correct lockfile `COPY`, `RUN install`, and `RUN build` lines. Package Manager `<select>` shown in `DockerfileForm.tsx` for nodejs, nextjs, and react-vite frameworks.
 
 ---
 
@@ -524,6 +522,7 @@ test("Select Python FastAPI and verify port 8000", async ({ page }) => {
 
 | Version | Date | Changes |
 |---|---|---|
+| `v1.1.0` | 2026-07 | Phase 3 Priority 1: Deno support, Compose `.dockerignore` tab, Compose v2 spec toggle, pnpm/yarn/bun package manager selector |
 | `v1.0.0` | 2026-07 | Initial release: 14 frameworks, 7 service presets, Dockerfile + Compose generators |
 
 ---
