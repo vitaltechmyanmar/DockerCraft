@@ -29,7 +29,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^0.414.0",
     "next": "^14.2.5",
-    "react": "^18",
+    "react": "^19",
     "react-dom": "^18",
     "react-syntax-highlighter": "^15.5.0",
     "tailwind-merge": "^2.4.0"
@@ -39,7 +39,7 @@
     "@types/jest": "^29.5.12",
     "@types/jszip": "^3.4.0",
     "@types/node": "^20",
-    "@types/react": "^18",
+    "@types/react": "^19",
     "@types/react-dom": "^18",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@typescript-eslint/eslint-plugin": "^7",
