@@ -46,17 +46,3 @@ export function ComposePreview({ config }: ComposePreviewProps) {
     </div>
   );
 }
-
-function PreviewTabBtn({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium transition-colors duration-150",
-        active ? "tab-active" : "tab-inactive"
-      )}
-    >
-      {icon}{label}
-    </button>
-  );
-}

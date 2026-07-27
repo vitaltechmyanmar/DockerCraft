@@ -1,4 +1,4 @@
-import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
+import { DockerfileConfig, FrameworkId } from "@/types/dockerfile";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -11,57 +11,6 @@ function envVarsBlock(config: DockerfileConfig): string {
 function healthCheckBlock(config: DockerfileConfig): string {
   if (!config.healthCheck) return "";
   return `\nHEALTHCHECK --interval=${config.healthCheckInterval}s --timeout=5s --start-period=10s --retries=3 \\\n  CMD wget -qO- http://localhost:${config.port}${config.healthCheckPath} || exit 1`;
-}
-
-// ─── Package Manager Helper ──────────────────────────────────────────────────
-
-interface PkgCmds {
-  /** Files to COPY for the install step (e.g. "package*.json" or "package.json pnpm-lock.yaml") */
-  lockfiles: string;
-  /** RUN install command */
-  install: string;
-  /** RUN install (production-only) command */
-  installProd: string;
-  /** RUN build command */
-  build: string;
-}
-
-function pkgMgrCommands(pm: JsPackageManager = "npm"): PkgCmds {
-  switch (pm) {
-    case "pnpm":
-      return {
-        // pnpm-lock.yaml* — copies if present, harmless if missing
-        lockfiles: "package.json pnpm-lock.yaml* ./",
-        install: "RUN corepack enable && pnpm install --frozen-lockfile",
-        installProd: "RUN corepack enable && pnpm install --frozen-lockfile --prod",
-        build: "RUN pnpm run build",
-      };
-    case "yarn":
-      return {
-        // yarn.lock* — copies if present, harmless if missing
-        lockfiles: "package.json yarn.lock* ./",
-        install: "RUN yarn install --frozen-lockfile",
-        installProd: "RUN yarn install --frozen-lockfile --production",
-        build: "RUN yarn build",
-      };
-    case "bun":
-      return {
-        // bun.lockb* — copies if present, harmless if missing
-        lockfiles: "package.json bun.lockb* ./",
-        install: "RUN bun install --frozen-lockfile",
-        installProd: "RUN bun install --frozen-lockfile --production",
-        build: "RUN bun run build",
-      };
-    case "npm":
-    default:
-      return {
-        // package-lock.json* — copies if present; fallback to npm install if missing
-        lockfiles: "package.json package-lock.json* ./",
-        install: "RUN [ -f package-lock.json ] && npm ci || npm install",
-        installProd: "RUN [ -f package-lock.json ] && npm ci --omit=dev || npm install --omit=dev",
-        build: "RUN npm run build",
-      };
-  }
 }
 
 // ─── Framework-specific generators ──────────────────────────────────────────
@@ -85,7 +34,7 @@ FROM node:${baseTag} AS builder
 WORKDIR ${config.workdir}
 COPY --from=deps ${config.workdir}/node_modules ./node_modules
 COPY . .
-${pm.build}
+RUN npm run build
 
 # ─── Stage 3: Runner ──────────────────────────────────────────────
 FROM node:${baseTag} AS runner

@@ -188,23 +188,6 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
           </div>
         </div>
 
-        {isJsFramework && (
-          <div>
-            <Label htmlFor="pkg-manager">Package Manager</Label>
-            <Select
-              id="pkg-manager"
-              value={config.packageManager ?? "npm"}
-              onChange={(v) => update("packageManager", v as JsPackageManager)}
-              options={[
-                { value: "npm", label: "npm" },
-                { value: "pnpm", label: "pnpm" },
-                { value: "yarn", label: "yarn" },
-                { value: "bun", label: "bun" },
-              ]}
-            />
-          </div>
-        )}
-
         <div>
           <Label htmlFor="build-cmd">Build Command</Label>
           <Input id="build-cmd" value={config.buildCommand} onChange={(v) => update("buildCommand", v)} placeholder="npm run build" className="font-mono text-xs" />
