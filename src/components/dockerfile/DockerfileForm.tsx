@@ -153,65 +153,11 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
         <FrameworkSelector selected={config.framework} onChange={handleFrameworkChange} />
       </div>
 
-<<<<<<< HEAD
       {/* Configuration */}
       <div className="space-y-3">
         <Divider label="Configuration" />
 
         <div className="grid grid-cols-2 gap-3">
-=======
-      {/* Base Config */}
-      <div>
-        <SectionTitle>Configuration</SectionTitle>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="version">Version</Label>
-              <Select
-                id="version"
-                value={config.version}
-                onChange={(v) => update("version", v)}
-                options={fw.versions.map((v) => ({ value: v, label: v }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="base-image">Base Image</Label>
-              <Select
-                id="base-image"
-                value={config.baseImage}
-                onChange={(v) => update("baseImage", v as DockerfileConfig["baseImage"])}
-                options={[
-                  { value: "alpine", label: "Alpine (smallest)" },
-                  { value: "slim", label: "Slim (balanced)" },
-                  { value: "debian", label: "Debian (compat.)" },
-                ]}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="workdir">Working Directory</Label>
-              <Input
-                id="workdir"
-                value={config.workdir}
-                onChange={(v) => update("workdir", v)}
-                placeholder="/app"
-              />
-            </div>
-            <div>
-              <Label htmlFor="port">Port</Label>
-              <Input
-                id="port"
-                type="number"
-                value={config.port}
-                onChange={(v) => update("port", parseInt(v) || 3000)}
-                placeholder="3000"
-              />
-            </div>
-          </div>
-
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
           <div>
             <Label htmlFor="version">Version</Label>
             <Select id="version" value={config.version} onChange={(v) => update("version", v)} options={fw.versions.map((v) => ({ value: v, label: v }))} />
@@ -241,23 +187,6 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
             <Input id="port" type="number" value={config.port} onChange={(v) => update("port", parseInt(v) || 3000)} placeholder="3000" />
           </div>
         </div>
-
-        {isJsFramework && (
-          <div>
-            <Label htmlFor="pkg-manager">Package Manager</Label>
-            <Select
-              id="pkg-manager"
-              value={config.packageManager ?? "npm"}
-              onChange={(v) => update("packageManager", v as JsPackageManager)}
-              options={[
-                { value: "npm", label: "npm" },
-                { value: "pnpm", label: "pnpm" },
-                { value: "yarn", label: "yarn" },
-                { value: "bun", label: "bun" },
-              ]}
-            />
-          </div>
-        )}
 
         <div>
           <Label htmlFor="build-cmd">Build Command</Label>
