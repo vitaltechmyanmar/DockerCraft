@@ -27,13 +27,11 @@ const DEFAULT_DOCKERFILE_CONFIG: DockerfileConfig = {
   healthCheck: false,
   healthCheckPath: "/health",
   healthCheckInterval: 30,
-  packageManager: "npm",
 };
 
 const DEFAULT_COMPOSE_CONFIG: ComposeConfig = {
   version: "3.9",
   projectName: "my-project",
-  useV2Spec: false,
   services: [
     {
       id: generateId(),

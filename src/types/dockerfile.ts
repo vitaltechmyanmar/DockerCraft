@@ -15,7 +15,6 @@ export type FrameworkId =
   | "nextjs"
   | "react-vite"
   | "bun"
-  | "deno"
   | "python-fastapi"
   | "python-django"
   | "python-flask"
@@ -26,8 +25,6 @@ export type FrameworkId =
   | "ruby-rails"
   | "nginx"
   | "static";
-
-export type JsPackageManager = "npm" | "pnpm" | "yarn" | "bun";
 
 export interface FrameworkTemplate {
   id: FrameworkId;
@@ -59,7 +56,5 @@ export interface DockerfileConfig {
   healthCheck: boolean;
   healthCheckPath: string;
   healthCheckInterval: number;
-  /** Package manager override for JS frameworks (nodejs, nextjs, react-vite) */
-  packageManager?: JsPackageManager;
   dockerignoreContent?: string;
 }

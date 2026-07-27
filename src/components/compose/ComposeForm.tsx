@@ -97,16 +97,20 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
             <Input id="project-name" value={config.projectName} onChange={(v) => update("projectName", v)} placeholder="my-project" />
           </div>
           <div>
+<<<<<<< HEAD
             <label
               className="block text-xs font-medium mb-1 transition-colors"
               style={{ color: config.useV2Spec ? "var(--text-subtle)" : "var(--text-muted)", textDecoration: config.useV2Spec ? "line-through" : "none" }}
             >
               Compose Version
             </label>
+=======
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">Compose Version</label>
+>>>>>>> parent of 3e25b2f (Feat: Deno framework support)
             <select
               value={config.version}
-              disabled={config.useV2Spec}
               onChange={(e) => update("version", e.target.value)}
+<<<<<<< HEAD
               className="w-full rounded px-3 py-2 text-sm transition-all"
               style={{
                 background: "var(--bg-elevated)",
@@ -116,6 +120,9 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
                 opacity: config.useV2Spec ? 0.5 : 1,
                 cursor: config.useV2Spec ? "not-allowed" : "default",
               }}
+=======
+              className="w-full rounded-lg bg-white/[0.05] border border-white/10 px-3 py-2.5 text-sm text-slate-200 [&>option]:bg-slate-900 focus:outline-none focus:border-docker-blue/50"
+>>>>>>> parent of 3e25b2f (Feat: Deno framework support)
             >
               <option value="3.9" style={{ background: "var(--bg-panel)" }}>3.9 (latest)</option>
               <option value="3.8" style={{ background: "var(--bg-panel)" }}>3.8</option>
@@ -123,6 +130,7 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
             </select>
           </div>
         </div>
+<<<<<<< HEAD
 
         {/* Compose v2 toggle */}
         <div
@@ -152,6 +160,8 @@ export function ComposeForm({ config, onChange }: ComposeFormProps) {
             />
           </div>
         </div>
+=======
+>>>>>>> parent of 3e25b2f (Feat: Deno framework support)
       </div>
 
       {/* Services */}
