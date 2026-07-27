@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-﻿import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
+import { DockerfileConfig, FrameworkId } from "@/types/dockerfile";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-=======
-import { DockerfileConfig, FrameworkId } from "@/types/dockerfile";
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
 
 function envVarsBlock(config: DockerfileConfig): string {
   if (config.envVars.length === 0) return "";
@@ -17,62 +13,7 @@ function healthCheckBlock(config: DockerfileConfig): string {
   return `\nHEALTHCHECK --interval=${config.healthCheckInterval}s --timeout=5s --start-period=10s --retries=3 \\\n  CMD wget -qO- http://localhost:${config.port}${config.healthCheckPath} || exit 1`;
 }
 
-<<<<<<< HEAD
-// ─── Package Manager Helper ──────────────────────────────────────────────────
-
-interface PkgCmds {
-  /** Files to COPY for the install step (e.g. "package*.json" or "package.json pnpm-lock.yaml") */
-  lockfiles: string;
-  /** RUN install command */
-  install: string;
-  /** RUN install (production-only) command */
-  installProd: string;
-  /** RUN build command */
-  build: string;
-}
-
-function pkgMgrCommands(pm: JsPackageManager = "npm"): PkgCmds {
-  switch (pm) {
-    case "pnpm":
-      return {
-        // pnpm-lock.yaml* — copies if present, harmless if missing
-        lockfiles: "package.json pnpm-lock.yaml* ./",
-        install: "RUN corepack enable && pnpm install --frozen-lockfile",
-        installProd: "RUN corepack enable && pnpm install --frozen-lockfile --prod",
-        build: "RUN pnpm run build",
-      };
-    case "yarn":
-      return {
-        // yarn.lock* — copies if present, harmless if missing
-        lockfiles: "package.json yarn.lock* ./",
-        install: "RUN yarn install --frozen-lockfile",
-        installProd: "RUN yarn install --frozen-lockfile --production",
-        build: "RUN yarn build",
-      };
-    case "bun":
-      return {
-        // bun.lockb* — copies if present, harmless if missing
-        lockfiles: "package.json bun.lockb* ./",
-        install: "RUN bun install --frozen-lockfile",
-        installProd: "RUN bun install --frozen-lockfile --production",
-        build: "RUN bun run build",
-      };
-    case "npm":
-    default:
-      return {
-        // package-lock.json* — copies if present; fallback to npm install if missing
-        lockfiles: "package.json package-lock.json* ./",
-        install: "RUN [ -f package-lock.json ] && npm ci || npm install",
-        installProd: "RUN [ -f package-lock.json ] && npm ci --omit=dev || npm install --omit=dev",
-        build: "RUN npm run build",
-      };
-  }
-}
-
 // ─── Framework-specific generators ──────────────────────────────────────────
-=======
-// ─── Framework-specific generators ─────────────────────────────────────────────
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
 
 function generateNodejs(config: DockerfileConfig): string {
   const baseTag = config.baseImage === "alpine"
@@ -93,7 +34,7 @@ FROM node:${baseTag} AS builder
 WORKDIR ${config.workdir}
 COPY --from=deps ${config.workdir}/node_modules ./node_modules
 COPY . .
-${pm.build}
+RUN npm run build
 
 # ─── Stage 3: Runner ──────────────────────────────────────────────
 FROM node:${baseTag} AS runner
@@ -198,23 +139,6 @@ COPY . .
 EXPOSE ${config.port}
 CMD ["bun", "run", "start"]${healthCheckBlock(config)}`;
 }
-
-<<<<<<< HEAD
-function generateDeno(config: DockerfileConfig): string {
-  return `FROM denoland/deno:${config.version}
-WORKDIR ${config.workdir}
-${envVarsBlock(config)}
-${config.nonRootUser ? `RUN groupadd --system --gid 1001 denogroup && \\\n    useradd --system --uid 1001 --gid denogroup denouser\n` : ""}
-# Cache dependencies (runs deno cache on entry point)
-COPY . .
-RUN ${config.buildCommand}
-${config.nonRootUser ? "\nUSER denouser\n" : ""}
-EXPOSE ${config.port}
-CMD [${config.startCommand.split(" ").map((s) => `"${s}"`).join(", ")}]${healthCheckBlock(config)}`;
-}
-
-=======
->>>>>>> parent of 3e25b2f (Feat: Deno framework support)
 function generatePython(config: DockerfileConfig): string {
   const baseTag = config.baseImage === "alpine"
     ? `${config.version}-alpine`
