@@ -1,4 +1,6 @@
-import { DockerfileConfig, FrameworkId } from "@/types/dockerfile";
+import { DockerfileConfig, FrameworkId, JsPackageManager } from "@/types/dockerfile";
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function envVarsBlock(config: DockerfileConfig): string {
   if (config.envVars.length === 0) return "";
@@ -11,9 +13,57 @@ function healthCheckBlock(config: DockerfileConfig): string {
   return `\nHEALTHCHECK --interval=${config.healthCheckInterval}s --timeout=5s --start-period=10s --retries=3 \\\n  CMD wget -qO- http://localhost:${config.port}${config.healthCheckPath} || exit 1`;
 }
 
-// ─── Framework-specific generators ─────────────────────────────────────────────
+// ─── Package Manager Helper ──────────────────────────────────────────────────
+
+interface PkgCmds {
+  /** Files to COPY for the install step (e.g. "package*.json" or "package.json pnpm-lock.yaml") */
+  lockfiles: string;
+  /** RUN install command */
+  install: string;
+  /** RUN install (production-only) command */
+  installProd: string;
+  /** RUN build command */
+  build: string;
+}
+
+function pkgMgrCommands(pm: JsPackageManager = "npm"): PkgCmds {
+  switch (pm) {
+    case "pnpm":
+      return {
+        lockfiles: "package.json pnpm-lock.yaml ./",
+        install: "RUN corepack enable && pnpm install --frozen-lockfile",
+        installProd: "RUN corepack enable && pnpm install --frozen-lockfile --prod",
+        build: "RUN pnpm run build",
+      };
+    case "yarn":
+      return {
+        lockfiles: "package.json yarn.lock ./",
+        install: "RUN yarn install --frozen-lockfile",
+        installProd: "RUN yarn install --frozen-lockfile --production",
+        build: "RUN yarn build",
+      };
+    case "bun":
+      return {
+        lockfiles: "package.json bun.lockb ./",
+        install: "RUN bun install --frozen-lockfile",
+        installProd: "RUN bun install --frozen-lockfile --production",
+        build: "RUN bun run build",
+      };
+    case "npm":
+    default:
+      return {
+        lockfiles: "package*.json ./",
+        install: "RUN npm ci",
+        installProd: "RUN npm ci --only=production",
+        build: "RUN npm run build",
+      };
+  }
+}
+
+// ─── Framework-specific generators ──────────────────────────────────────────
 
 function generateNodejs(config: DockerfileConfig): string {
+  const pm = pkgMgrCommands(config.packageManager);
   const baseTag = config.baseImage === "alpine"
     ? `${config.version}-alpine`
     : config.baseImage === "slim"
@@ -24,8 +74,8 @@ function generateNodejs(config: DockerfileConfig): string {
     return `# ─── Stage 1: Dependencies ────────────────────────────────────────
 FROM node:${baseTag} AS deps
 WORKDIR ${config.workdir}
-COPY package*.json ./
-RUN npm ci
+COPY ${pm.lockfiles}
+${pm.install}
 
 # ─── Stage 2: Builder ─────────────────────────────────────────────
 FROM node:${baseTag} AS builder
@@ -38,8 +88,7 @@ RUN ${config.buildCommand}
 FROM node:${baseTag} AS runner
 WORKDIR ${config.workdir}
 ENV NODE_ENV=production${envVarsBlock(config)}
-${config.nonRootUser ? `RUN addgroup --system --gid 1001 appgroup && \\
-    adduser --system --uid 1001 --ingroup appgroup appuser\n` : ""}
+${config.nonRootUser ? `RUN addgroup --system --gid 1001 appgroup && \\\n    adduser --system --uid 1001 --ingroup appgroup appuser\n` : ""}
 COPY --from=builder ${config.workdir}/node_modules ./node_modules
 COPY --from=builder ${config.workdir} .
 ${config.nonRootUser ? "\nUSER appuser\n" : ""}
@@ -51,8 +100,8 @@ CMD ["${config.startCommand.replace(/"/g, '\\"')}"]${healthCheckBlock(config)}`;
 WORKDIR ${config.workdir}
 ENV NODE_ENV=production${envVarsBlock(config)}
 
-COPY package*.json ./
-RUN npm ci --only=production
+COPY ${pm.lockfiles}
+${pm.installProd}
 
 COPY . .
 
@@ -61,6 +110,7 @@ CMD ["${config.startCommand.replace(/"/g, '\\"')}"]${healthCheckBlock(config)}`;
 }
 
 function generateNextjs(config: DockerfileConfig): string {
+  const pm = pkgMgrCommands(config.packageManager);
   const baseTag = config.baseImage === "alpine"
     ? `${config.version}-alpine`
     : `${config.version}-slim`;
@@ -69,8 +119,8 @@ function generateNextjs(config: DockerfileConfig): string {
 FROM node:${baseTag} AS deps
 RUN apk add --no-cache libc6-compat 2>/dev/null || true
 WORKDIR ${config.workdir}
-COPY package*.json ./
-RUN npm ci
+COPY ${pm.lockfiles}
+${pm.install}
 
 # ─── Stage 2: Builder ─────────────────────────────────────────────
 FROM node:${baseTag} AS builder
@@ -78,7 +128,7 @@ WORKDIR ${config.workdir}
 COPY --from=deps ${config.workdir}/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+${pm.build}
 
 # ─── Stage 3: Runner ──────────────────────────────────────────────
 FROM node:${baseTag} AS runner
@@ -86,8 +136,7 @@ WORKDIR ${config.workdir}
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1${envVarsBlock(config)}
-${config.nonRootUser ? `RUN addgroup --system --gid 1001 nodejs && \\
-    adduser --system --uid 1001 nextjs\n` : ""}
+${config.nonRootUser ? `RUN addgroup --system --gid 1001 nodejs && \\\n    adduser --system --uid 1001 nextjs\n` : ""}
 COPY --from=builder ${config.workdir}/public ./public
 COPY --from=builder --chown=${config.nonRootUser ? "nextjs:nodejs" : "root:root"} ${config.workdir}/.next/standalone ./
 COPY --from=builder --chown=${config.nonRootUser ? "nextjs:nodejs" : "root:root"} ${config.workdir}/.next/static ./.next/static
@@ -98,15 +147,16 @@ CMD ["node", "server.js"]${healthCheckBlock(config)}`;
 }
 
 function generateReactVite(config: DockerfileConfig): string {
+  const pm = pkgMgrCommands(config.packageManager);
   return `# ─── Stage 1: Builder ─────────────────────────────────────────────
 FROM node:${config.version}-alpine AS builder
 WORKDIR ${config.workdir}${envVarsBlock(config)}
 
-COPY package*.json ./
-RUN npm ci
+COPY ${pm.lockfiles}
+${pm.install}
 
 COPY . .
-RUN npm run build
+${pm.build}
 
 # ─── Stage 2: Nginx Server ────────────────────────────────────────
 FROM nginx:alpine AS runner
@@ -130,13 +180,25 @@ RUN bun install --frozen-lockfile --production
 FROM base AS runner
 WORKDIR ${config.workdir}
 ENV NODE_ENV=production${envVarsBlock(config)}
-${config.nonRootUser ? `RUN addgroup --system --gid 1001 appgroup && \\
-    adduser --system --uid 1001 --ingroup appgroup appuser\nUSER appuser\n` : ""}
+${config.nonRootUser ? `RUN addgroup --system --gid 1001 appgroup && \\\n    adduser --system --uid 1001 --ingroup appgroup appuser\nUSER appuser\n` : ""}
 COPY --from=deps ${config.workdir}/node_modules ./node_modules
 COPY . .
 
 EXPOSE ${config.port}
 CMD ["bun", "run", "start"]${healthCheckBlock(config)}`;
+}
+
+function generateDeno(config: DockerfileConfig): string {
+  return `FROM denoland/deno:${config.version}
+WORKDIR ${config.workdir}
+${envVarsBlock(config)}
+${config.nonRootUser ? `RUN addgroup --system --gid 1001 denogroup && \\\n    adduser --system --uid 1001 --ingroup denogroup denouser\n` : ""}
+# Cache dependencies (runs deno cache on entry point)
+COPY . .
+RUN ${config.buildCommand}
+${config.nonRootUser ? "\nUSER denouser\n" : ""}
+EXPOSE ${config.port}
+CMD [${config.startCommand.split(" ").map((s) => `"${s}"`).join(", ")}]${healthCheckBlock(config)}`;
 }
 
 function generatePython(config: DockerfileConfig): string {
@@ -216,8 +278,7 @@ RUN ./mvnw package -DskipTests
 FROM eclipse-temurin:${config.version}-jre-alpine AS runner
 WORKDIR ${config.workdir}
 ${envVarsBlock(config)}
-${config.nonRootUser ? `RUN addgroup --system --gid 1001 spring && \\
-    adduser --system --uid 1001 --ingroup spring spring\nUSER spring\n` : ""}
+${config.nonRootUser ? `RUN addgroup --system --gid 1001 spring && \\\n    adduser --system --uid 1001 --ingroup spring spring\nUSER spring\n` : ""}
 COPY --from=builder ${config.workdir}/target/*.jar app.jar
 
 EXPOSE ${config.port}
@@ -336,7 +397,7 @@ EXPOSE ${config.port}
 CMD ["nginx", "-g", "daemon off;"]${healthCheckBlock(config)}`;
 }
 
-// ─── Main Generator ─────────────────────────────────────────────────────────
+// ─── Main Generator ──────────────────────────────────────────────────────────
 
 export function generateDockerfile(config: DockerfileConfig): string {
   const generators: Record<FrameworkId, (c: DockerfileConfig) => string> = {
@@ -344,6 +405,7 @@ export function generateDockerfile(config: DockerfileConfig): string {
     nextjs: generateNextjs,
     "react-vite": generateReactVite,
     bun: generateBun,
+    deno: generateDeno,
     "python-fastapi": generatePython,
     "python-django": generatePython,
     "python-flask": generatePython,
@@ -403,6 +465,12 @@ export function generateDockerignore(config: DockerfileConfig): string {
     ".nyc_output/",
   ];
 
+  const denoSpecific = [
+    "# Deno",
+    ".deno/",
+    "coverage/",
+  ];
+
   const pythonSpecific = [
     "# Python",
     "__pycache__/",
@@ -440,6 +508,8 @@ export function generateDockerignore(config: DockerfileConfig): string {
   let frameworkSpecific: string[] = [];
   if (["nodejs", "nextjs", "react-vite", "bun"].includes(config.framework)) {
     frameworkSpecific = jsSpecific;
+  } else if (config.framework === "deno") {
+    frameworkSpecific = denoSpecific;
   } else if (config.framework.startsWith("python")) {
     frameworkSpecific = pythonSpecific;
   } else if (config.framework === "go") {

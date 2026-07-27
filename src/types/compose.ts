@@ -52,4 +52,6 @@ export interface ComposeConfig {
   services: ServiceConfig[];
   networks: string[];
   volumes: string[];
+  /** When true, omits the top-level `version:` field (Compose v2 / Compose Spec) */
+  useV2Spec: boolean;
 }

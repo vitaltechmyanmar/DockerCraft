@@ -1,5 +1,5 @@
 "use client";
-import { DockerfileConfig, EnvVar } from "@/types/dockerfile";
+import { DockerfileConfig, EnvVar, JsPackageManager } from "@/types/dockerfile";
 import { FRAMEWORK_TEMPLATES } from "@/lib/generators/templates";
 import { FrameworkSelector } from "./FrameworkSelector";
 import { cn } from "@/lib/utils";
@@ -226,6 +226,24 @@ export function DockerfileForm({ config, onChange }: DockerfileFormProps) {
               />
             </div>
           </div>
+
+          {/* Package Manager — JS frameworks only */}
+          {["nodejs", "nextjs", "react-vite"].includes(config.framework) && (
+            <div>
+              <Label htmlFor="pkg-manager">Package Manager</Label>
+              <Select
+                id="pkg-manager"
+                value={config.packageManager ?? "npm"}
+                onChange={(v) => update("packageManager", v as JsPackageManager)}
+                options={[
+                  { value: "npm", label: "npm" },
+                  { value: "pnpm", label: "pnpm" },
+                  { value: "yarn", label: "yarn" },
+                  { value: "bun", label: "bun" },
+                ]}
+              />
+            </div>
+          )}
 
           <div>
             <Label htmlFor="build-cmd">Build Command</Label>
